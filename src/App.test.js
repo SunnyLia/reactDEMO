@@ -209,10 +209,90 @@ class LoggingButton extends React.Component {
 // 向事件处理程序传递参数
 // 方法一，通过箭头函数传递
 <button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
-// 方法二，Function.prototype.bind 来实现
-<button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
+  // 方法二，Function.prototype.bind 来实现
+  <button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
 
 
 /*条件渲染*/
 // 方法一，if条件语句
 // 方法二，与运算符&&
+// 方法三，三目运算符
+// 阻止组件不进行任何渲染，可以让 render 方法直接返回 null
+
+
+/*列表&key*/
+// 渲染多个组件 map()
+
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+    <li key={number.toString()}>
+      {number}
+    </li>
+  );
+  return (
+    <ul>{listItems}</ul>
+  );
+}
+
+const numbers = [1, 2, 3, 4, 5];
+ReactDOM.render(
+  <NumberList numbers={numbers} />,
+  document.getElementById('root')
+);
+
+// key帮助react识别哪些元素改变了，比如被添加或删除，因此，应当给数组中的每一个元素赋予一个确定的标识。
+// 一个元素的key最好是这个元素在列表中拥有的一个独一无二的字符串，通常，使用来自数据id来作为元素的key.
+
+// 在jsx中嵌入map()
+function NumberList(props) {
+  const numbers = props.numbers;
+  return (
+    <ul>
+      {numbers.map((number) =>
+        <ListItem key={number.toString()}
+          value={number} />
+
+      )}
+    </ul>
+  );
+}
+
+/*表单*/
+// 受控组件
+// 在react中，可变状态通常保持在组件得state属性中，并且只能通过使用setState()来更新。
+// 总的来说，这使得 <input type="text">, <textarea> 和 <select> 之类的标签都非常相似—它们都接受一个 value 属性，你可以使用它来实现受控组件
+class NameForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: ''};
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+
+  handleSubmit(event) {
+    alert('提交的名字: ' + this.state.value);
+    event.preventDefault();
+  }
+
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          名字:
+          <input type="text" value={this.state.value} onChange={this.handleChange} />
+        </label>
+        <input type="submit" value="提交" />
+      </form>
+    );
+  }
+}
+
+/*状态提升*/
+// 在 React 中，将多个组件中需要共享的 state 向上移动到它们的最近共同父组件中，便可实现共享 state。这就是所谓的“状态提升”
+
