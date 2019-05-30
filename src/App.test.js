@@ -296,3 +296,53 @@ class NameForm extends React.Component {
 /*状态提升*/
 // 在 React 中，将多个组件中需要共享的 state 向上移动到它们的最近共同父组件中，便可实现共享 state。这就是所谓的“状态提升”
 
+
+/*组合&继承*/
+// 包含关系
+// 父组件可以在子组件标签的内部插入具体内容，子组件可以通过prop children来接收并渲染结果
+function FancyBorder(props) {
+  return (
+    <div className={'FancyBorder FancyBorder-' + props.color}>
+      {props.children}
+    </div>
+  );
+}
+function WelcomeDialog() {
+  return (
+    <FancyBorder color="blue">
+      <h1 className="Dialog-title">
+        Welcome
+      </h1>
+      <p className="Dialog-message">
+        Thank you for visiting our spacecraft!
+      </p>
+    </FancyBorder>
+  );
+}
+
+
+// 在父组件中，可将其他组件名称作为props参数传递到子组件相应的位置
+function SplitPane(props) {
+  return (
+    <div className="SplitPane">
+      <div className="SplitPane-left">
+        {props.left}
+      </div>
+      <div className="SplitPane-right">
+        {props.right}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SplitPane
+      left={
+        <Contacts />
+      }
+      right={
+        <Chat />
+      } />
+  );
+}
