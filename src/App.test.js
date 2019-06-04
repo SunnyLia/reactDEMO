@@ -180,3 +180,41 @@ function Content() {
 }
 
 ReactDOM.render(<App />, document.getElementById('root'));
+
+
+/*错误边界*/
+// 错误边界是一种 React 组件，这种组件可以捕获并打印发生在其子组件树任何位置的 JavaScript 错误，并且，它会渲染出备用 UI，而不是渲染那些崩溃了的子组件树。
+// 错误边界在渲染期间、生命周期方法和整个组件树的构造函数中捕获错误。
+/*错误边界无法捕获以下场景中产生的错误：
+
+    事件处理（了解更多）
+    异步代码（例如 setTimeout 或 requestAnimationFrame 回调函数）
+    服务端渲染
+    它自身抛出来的错误（并非它的子组件）*/
+// 注意错误边界仅可以捕获其子组件的错误，它无法捕获其自身的错误。
+// 只有 class 组件才可以成为成错误边界组件
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error) {
+        // Update state so the next render will show the fallback UI.
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, info) {
+        // You can also log the error to an error reporting service
+        logErrorToMyService(error, info);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            // You can render any custom fallback UI
+            return <h1>Something went wrong.</h1>;
+        }
+
+        return this.props.children;
+    }
+}
