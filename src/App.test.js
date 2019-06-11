@@ -263,3 +263,263 @@ function logProps(Component) {
         return <LogProps {...props} forwardedRef={ref} />;
     });
 }
+
+
+/*FragMents*/
+// React 中的一个常见模式是一个组件返回多个元素。Fragments 允许你将子列表分组，而无需向 DOM 添加额外节点。
+function Glossary(props) {
+    return (
+        <dl>
+            {props.items.map(item => (
+                // 没有`key`，React 会发出一个关键警告
+                <React.Fragment key={item.id}>
+                    <dt>{item.term}</dt>
+                    <dd>{item.description}</dd>
+                </React.Fragment>
+            ))}
+        </dl>
+    );
+}
+
+
+/*高阶组件HOC*/
+// 高阶组件是参数为组件，返回值为新组件的函数
+const EnhancedComponent = higherOrderComponent(WrappedComponent);
+// 组件是将 props 转换为 UI，而高阶组件是将组件转换为另一个组件。
+
+
+// 我们可以编写一个创建组件的函数，比如 CommentList 和 BlogPost，订阅 DataSource。
+// 该函数将接受一个子组件作为它的其中一个参数，该子组件将订阅数据作为 prop。让我们调用函数 withSubscription：
+// 第一个参数是被包装组件。第二个参数通过 DataSource 和当前的 props 返回我们需要的数据。
+// 当渲染 CommentListWithSubscription 和 BlogPostWithSubscription 时， CommentList 和 BlogPost 将传递一个 data prop，其中包含从 DataSource 检索到的最新数据：
+const CommentListWithSubscription = withSubscription(
+    CommentList,
+    (DataSource) => DataSource.getComments()
+);
+
+const BlogPostWithSubscription = withSubscription(
+    BlogPost,
+    (DataSource, props) => DataSource.getBlogPost(props.id)
+);
+
+// 此函数接收一个组件...
+function withSubscription(WrappedComponent, selectData) {
+    // ...并返回另一个组件...
+    return class extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleChange = this.handleChange.bind(this);
+            this.state = {
+                data: selectData(DataSource, props)
+            };
+        }
+
+        componentDidMount() {
+            // ...负责订阅相关的操作...
+            DataSource.addChangeListener(this.handleChange);
+        }
+
+        componentWillUnmount() {
+            DataSource.removeChangeListener(this.handleChange);
+        }
+
+        handleChange() {
+            this.setState({
+                data: selectData(DataSource, this.props)
+            });
+        }
+
+        render() {
+            // ... 并使用新数据渲染被包装的组件!
+            // 请注意，我们可能还会传递其他属性
+            return <WrappedComponent data={this.state.data} {...this.props} />;
+        }
+    };
+}
+
+
+/*深入JSX */
+// 一、指定React元素类型
+// 1、React必须在作用域内
+// 由于JSX会编译未React.createElement调用形式，所以React库也必须包含在JSX代码作用域内。
+// 2、在JSX类型中使用点语法
+// 当在一个木块中导出许多React组件时，可以使用点语法引入一个React组件。
+import React from 'react';
+
+const MyComponents = {
+    DatePicker: function DatePicker(props) {
+        return <div>Imagine a {props.color} datepicker here.</div>;
+    }
+}
+
+function BlueDatePicker() {
+    return <MyComponents.DatePicker color="blue" />;
+}
+// 3、用户定义得组件必须以大写字母开头
+// 4、动态选择JSX类型
+// 你不能将通用表达式作为React元素类型。如果你想通过通用表达式来动态来决定元素类型，需要先将它赋值给大写字母开头得变量。
+import React from 'react';
+import { PhotoStory, VideoStory } from './stories';
+
+const components = {
+    photo: PhotoStory,
+    video: VideoStory
+};
+
+function Story(props) {
+    /*// 错误！JSX 类型不能是一个表达式。
+    return <components[props.storyType] story={props.story} />;*/
+    // 正确！JSX 类型可以是大写字母开头的变量。
+    const SpecificStory = components[props.storyType];
+    return <SpecificStory story={props.story} />;
+}
+
+// 二、JSX中的Props
+// 1、JavaScript表达式作为Props
+// 可以把包裹在{}中的JavaScript表达式作为一个prop传递给JSX元素
+<MyComponent foo={1 + 2 + 3 + 4} />
+// if语句及for循环不是JavaScript表达式，所以不能再JSX中直接使用，可以用在jsx以外的代码中。
+// 2、字符串字面量
+// 3、Props默认值为"True"
+// 4、...展开运算符，用来在JSX中传递整个props对象
+// 缺点：很容易讲不必要的props传递给不相干的组件，或者将无效的HTML熟悉传递给DOM
+function App1() {
+    return <Greeting firstName="Ben" lastName="Hector" />;
+}
+
+function App2() {
+    const props = { firstName: 'Ben', lastName: 'Hector' };
+    return <Greeting {...props} />;
+}
+
+// 三、JSX中的子元素
+// 包含在开始和结束标签之间的jsx表达式内容将作为特定属性props.children传递给外层组件。
+// 传递子元素的方法：
+// 1、字符串字面量
+<MyComponent>Hello world!</MyComponent>
+    // 2、JSX子元素
+    <MyContaine1r>
+        <MyFirstComponent />
+        <MySecondComponent />
+    </MyContaine1r>
+// 3、JavaScript表达式作为子元素
+// JavaScript 表达式可以被包裹在 {} 中作为子元素
+function Item(props) {
+    return <li>{props.message}</li>;
+}
+
+// 4、函数作为子元素
+// 你可以将任何东西作为子元素传递给自定义组件，只要确保在该组件渲染之前能够被转换成 React 理解的对象。
+// 调用子元素回调 numTimes 次，来重复生成组件
+function Repeat(props) {
+    let items = [];
+    for (let i = 0; i < props.numTimes; i++) {
+        items.push(props.children(i));
+    }
+    return <div>{items}</div>;
+}
+
+function ListOfTenThings() {
+    return (
+        <Repeat numTimes={10}>
+            {(index) => <div key={index}>This is item {index} in the list</div>}
+        </Repeat>
+    );
+}
+// 5、布尔类型，Null以及Undefined将会被忽略，不会被渲染
+
+/*性能优化*/
+// 一、使用生产版本
+// 推荐你在开发应用时使用开发模式，而在为用户部署应用时使用生产模式。
+// 二、使用Chrome Performance标签分析组件
+// 能帮助你查看是否有不相关的组件被错误地更新，以及 UI 更新的深度和频率。
+// 三、使用React开发者工具中的分析器对组件进行分析
+// 四、虚拟化长列表
+// 如果在应用中渲染了长列表（上百甚至上千条数据），推荐使用“虚拟滚动”技术。这项技术会在有限的时间内仅渲染有限的内容，并奇迹般的降低重新渲染组件消耗的时间，以及创建DOM节点的数量
+// react-window和react-virtualized是热门的虚拟滚动库。他们提供了多种可复用的组件，用于展示列表、网格和表格数据。
+// 五、避免调停
+// 如果我们知道在什么情况下组件不需要更新，可以在shouldComponentUpdate中返回false来跳过整个渲染过程。其中包括该组件的render调用以及之后的操作
+// 示例
+// 如果你的组件只有当 props.color 或者 state.count 的值改变才需要更新时，你可以使用 shouldComponentUpdate 来进行检查：
+
+class CounterButton extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { count: 1 };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.color !== nextProps.color) {
+            return true;
+        }
+        if (this.state.count !== nextState.count) {
+            return true;
+        }
+        return false;
+    }
+
+    render() {
+        return (
+            <button
+                color={this.props.color}
+                onClick={() => this.setState(state => ({ count: state.count + 1 }))}>
+                Count: {this.state.count}
+            </button>
+        );
+    }
+}
+// 更简洁的形式React.PureComponent(只能进行浅比较)
+
+class CounterButton extends React.PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = { count: 1 };
+    }
+
+    render() {
+        return (
+            <button
+                color={this.props.color}
+                onClick={() => this.setState(state => ({ count: state.count + 1 }))}>
+                Count: {this.state.count}
+            </button>
+        );
+    }
+}
+// 五、不可变数据的力量
+// 六、使用不可变数据结构
+
+/*Portals*/
+// Portal提供了一种将子节点渲染到存在于父组件以外的DOM节点，可以被放置在 DOM 树中的任何地方
+React.createPortal(child, container)
+// 第一个参数（child）是任何可渲染的React子元素，它会把子元素渲染到container中。第二个参数（container）是一个DOM元素
+render() {
+    return ReactDOM.createPortal(
+        this.props.children,
+        domNode
+    );
+}
+// 一、通过Portal进行事件冒泡
+// 一个从portal内部触发的事件会一直冒泡至包含React树的祖先，即使这些元素并不是DOM树中的祖先。
+
+
+/*协调*/
+// 一、Diffing算法
+// 当对比两棵树时，React首先比较两棵树的根节点。
+// 1、比对不同类型的元素
+// 当根节点为不同类型的元素是，React会拆卸原有的树并建立起新的树。当拆卸一棵树时，对应的DOM节点也会被销毁。
+// 当拆卸一颗树时，对应的 DOM 节点也会被销毁。组件实例将执行 componentWillUnmount() 方法。
+// 当建立一颗新的树时，对应的 DOM 节点会被创建以及插入到 DOM 中。组件实例将执行 componentWillMount() 方法，紧接着 componentDidMount() 方法。所有跟之前的树所关联的 state 也会被销毁。
+// 2、比对同一类型的元素
+// 当比对两个相同类型的React元素时，React会保留DOM节点，仅比对及更新有改变的属性。在处理完当前节点之后，React继续对子节点进行递归
+// 3、比对同类型的组件元素
+// 当一个组件更新时，组件实例保持不变，这样state在跨越不同的渲染时保持一致。React将更新该组件实例的props以跟最新的元素保持一致，并调用该实例的componentWillReceiveProps() 和 componentWillUpdate() 方法.
+// 下一步，调用render()方法，diff算法将在之前的结果以及新的结果中进行递归
+// 4、对子节点进行递归
+// 默认条件下，当递归DOM节点的子元素时，React会同时遍历两个子元素的列表；当产生差异时，生成一个mutation。
+// 5、Keys
+// 当子元素拥有key时，React使用key来匹配原有树上的子元素以及最新树上的子元素。key能让转换变得更高效
+// key可以不需要全局唯一，但是再列表中必须保持唯一
+
+
+/*Refs&DOM*/
