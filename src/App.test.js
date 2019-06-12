@@ -468,7 +468,7 @@ class CounterButton extends React.Component {
         );
     }
 }
-// 更简洁的形式React.PureComponent(只能进行浅比较)
+// 更简洁的形式React.PureComponent(只能进行浅比较state和prop的方式来实现)
 
 class CounterButton extends React.PureComponent {
     constructor(props) {
@@ -523,3 +523,29 @@ render() {
 
 
 /*Refs&DOM*/
+// Refs提供了一种方式，允许我们访问DOM节点或在render方法中创建的React元素。
+// 一、何时使用Refs
+// 1、管理焦点，文本选择或媒体播放
+// 2、触发强制动画
+// 3、集成第三方DOM库
+// 避免使用refs来做任何可以通过声明式实现来完成的事情
+// 二、勿过度使用Refs
+// 通常，让更高层级的组件拥有state是更恰当的
+// 三、创建Refs
+// Refs是使用React.createRef()创建得，并通过ref属性附加到React元素。再构造组件时，通常将Refs分配给实例属性，以便可以再整个组件中引用她们
+class MyComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.myRef = React.createRef();
+    }
+    render() {
+        return <div ref={this.myRef} />;
+    }
+}
+// 四、访问Refs
+// 当 ref 被传递给 render 中的元素时，对该节点的引用可以在 ref 的 current 属性中被访问。
+const node = this.myRef.current;
+// ref 的值根据节点的类型而有所不同：
+// 1、当 ref 属性用于 HTML 元素时，构造函数中使用 React.createRef() 创建的 ref 接收底层 DOM 元素作为其 current 属性。
+// 2、当 ref 属性用于自定义 class 组件时，ref 对象接收组件的挂载实例作为其 current 属性。
+// 3、你不能在函数组件上使用 ref 属性，因为他们没有实例。
