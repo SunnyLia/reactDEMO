@@ -1,68 +1,85 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+<img src="https://img.shields.io/badge/Language-%20JavaScript%20-f9e229.svg">
+</p>
 
-## Available Scripts
+# react-demo(娃哈哈商城)
 
-In the project directory, you can run:
+##  技术栈
+### 前端
+📦 react + redux + react-router + react-router-redux + webpack + ES6 + sass
+### 后端
+ ✏️ Node(express)
 
-### `npm start`
+## 项目预览
+![Alt text](Read/sy.gif)
+![Alt text](Read/qt.gif)
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 运行项目
+ git clone https://github.com/Aemple/react-demo
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+ cd react-demo
 
-### `npm test`
+ npm i  或者运行  yarn(推荐)
+  
+ npm start
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+ cd server
 
-### `npm run build`
+ node app.js 或者 nodemon app.js(推荐)
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 目录结构划分
+```
+src
+  containers 放置页面组件比如说Home
+      components 放此页面组件独享的子组件
+  components 放置页面之间可以共享的共用组件
+  common 放一些公共的样式等内容
+  images 放图片
+  store redux仓库 
+      reducers
+      actions
+      action-types
+      index
+  index.js入口文件
+  index.html 模板文件
+```
+## redux结构
+![Alt text](Read/state.png)
 
-### `npm run eject`
+## 个人感悟（重难点）
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+装饰器使用能简化业务代码，让代码结构更清晰
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+注意提升页面性能（项目中：分流加载、防抖等）
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+刷新页面机制
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+受保护路由（在没有登录的情况下不能访问个性推荐、个人中心界面会跳转到登录界面）
 
-## Learn More
+刷新后登录状态获取（公共页面获取状态）
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+react-router-redux 页面路由、状态数据统一（后续写一个源码剖析）
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+💋💋💋注意！！！ 本人新做了一个React小项目，新版本也就是bable7中装饰器需要配置另外的插件 详细请查看bable官方文档 ^_^
 
-### Code Splitting
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
 
-### Analyzing the Bundle Size
+### 前后端交互技巧
+1. 定义仓库中的数据结构
+2. 去后台实现这个接口
+3. 前台编写一个请求此接口的API方法
+4. 定义action-types,修改reducer并处理此动作
+5. 编写一个action方法，用来调用API方法，请求接口，并得到返回的数据，构造action派发给仓库
+6. 在组件里调用此方法,并且填 充仓库
+7. 在组件使用此数据进行渲染
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+## 说明
 
-### Making a Progressive Web App
+  >  开发环境 window10  Chrome 65  nodejs 8.12.0
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+  >  如果觉得不错的话，您可以点右上角 "Star" 支持一下 谢谢！ ^_^
 
-### Advanced Configuration
+  >  如有问题请直接在 Issues 中提，或者您发现问题并有非常好的解决方案，欢迎 PR 👍
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
