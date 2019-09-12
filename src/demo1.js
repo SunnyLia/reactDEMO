@@ -222,28 +222,9 @@ class LoggingButton extends React.Component {
 
 
 /*列表&key*/
-// 渲染多个组件 map()
-
-function NumberList(props) {
-  const numbers = props.numbers;
-  const listItems = numbers.map((number) =>
-    <li key={number.toString()}>
-      {number}
-    </li>
-  );
-  return (
-    <ul>{listItems}</ul>
-  );
-}
-
-const numbers = [1, 2, 3, 4, 5];
-ReactDOM.render(
-  <NumberList numbers={numbers} />,
-  document.getElementById('root')
-);
-
+//1)key
 // key帮助react识别哪些元素改变了，比如被添加或删除，因此，应当给数组中的每一个元素赋予一个确定的标识。
-// 一个元素的key最好是这个元素在列表中拥有的一个独一无二的字符串，通常，使用来自数据id来作为元素的key.
+// 一个元素的key最好是在当前列表的兄弟节点之间必须唯一，并不需要在全局中唯一的。通常，使用来自数据id来作为元素的key.
 
 // 在jsx中嵌入map()
 function NumberList(props) {
@@ -261,8 +242,9 @@ function NumberList(props) {
 
 /*表单*/
 // 受控组件
-// 在react中，可变状态通常保持在组件得state属性中，并且只能通过使用setState()来更新。
-// 总的来说，这使得 <input type="text">, <textarea> 和 <select> 之类的标签都非常相似—它们都接受一个 value 属性，你可以使用它来实现受控组件
+// 通过将react组件中的state作为唯一数据源，同时控制用户输入过程中表单操作来达到进行更新组件state的目的。
+// React以这种方式控制取值的表单输入元素叫做“受控组件”
+// 总的来说，我们可以通过<input type="text">, <textarea> 和 <select> 之类的标签的value 属性来实现受控组件
 class NameForm extends React.Component {
   constructor(props) {
     super(props);
@@ -293,6 +275,55 @@ class NameForm extends React.Component {
     );
   }
 }
+
+//处理多个元素输入
+//当需要处理多个input元素时，我们可以给每个元素添加name属性，并让处理函数根据event.target.name的值选择要执行的操作。
+class Reservation extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isGoing: true,
+      numberOfGuests: 2
+    };
+
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({  //重点在这
+      [name]: value  
+    });
+  }
+
+  render() {
+    return (
+      <form>
+        <label>
+          参与:
+          <input
+            name="isGoing"
+            type="checkbox"
+            checked={this.state.isGoing}
+            onChange={this.handleInputChange} />
+        </label>
+        <br />
+        <label>
+          来宾人数:
+          <input
+            name="numberOfGuests"
+            type="number"
+            value={this.state.numberOfGuests}
+            onChange={this.handleInputChange} />
+        </label>
+      </form>
+    );
+  }
+}
+
 
 /*状态提升*/
 // 在 React 中，将多个组件中需要共享的 state 向上移动到它们的最近共同父组件中，便可实现共享 state。这就是所谓的“状态提升”
