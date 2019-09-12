@@ -134,9 +134,21 @@ ReactDOM.render(
   //单向数据流：
     //任何的 state 总是所属于特定的组件，而且从该 state 派生的任何数据或 UI 只能影响树中“低于”它们的组件。
 
-/*事件处理 */
-// 阻止默认行为 e.preventDefault();
 
+
+/*事件处理 */
+//react元素的事件处理和DOM元素的很相似，但是语法上的不同之处：
+  //1）React事件的命名采用小驼峰式，而不是纯小写
+  //2）使用jsx语法时需要传入一个函数作为事件处理函数，而不是一个字符串
+   //例如，传统的 HTML：
+    <button onclick="activateLasers()">
+      Activate Lasers
+    </button>
+   //在 React 中略微不同：
+    <button onClick={activateLasers}>
+      Activate Lasers
+    </button>
+  // 3）不能通过返回false的方式阻止默认行为，必须使用e.preventDefault()。
 // jsx回调函数中的this问题
 // 在JavaScript中，class的方法默认不会绑定this。
 // 如果忘记绑定this.handleClick并把它传入了onClick，当你调用这个函数的时候this的值为undefined。
