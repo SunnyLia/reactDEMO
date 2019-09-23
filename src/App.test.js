@@ -1,5 +1,5 @@
 /*代码分割*/
-// 1、import()
+// 1、import()引入
 import { add } from './math'; //使用之前
 console.log(add(16, 26));
 
@@ -7,7 +7,7 @@ import("./math").then(math => { //使用之后
     console.log(math.add(16, 26));
 });
 
-//2、React.lazy()可以处理动态引入的组件。当渲染组件时，自动导入引入组件的包。
+//2、React.lazy()可以处理动态引入的组件。当渲染组件时，自动导入引入组件的包。注意：不支持服务端渲染
 // eact.lazy 接受一个函数，这个函数需要动态调用 import()。它必须返回一个 Promise，该 Promise 需要 resolve 一个 defalut export 的 React 组件。
 // 使用之前：
 import OtherComponent from './OtherComponent';
@@ -27,7 +27,7 @@ function MyComponent() {
         </div>
     );
 }
-// Suspense
+// Suspense           注意：不支持服务端渲染
 // 在组件渲染完成之后，包含的其他组件的模块还没有被加载完成，可以使用加载治时期为组件做优雅降级
 // fallback 属性接受任何在组件加载过程中展示的React元素
 // Suspense组件置于懒加载组件之上的任何位置，甚至可以包裹国歌懒加载组件
@@ -75,6 +75,8 @@ const MyComponent = lazy(() => import("./MyComponent.js"));
 /*Context*/
 // props可以将数据自上而下（由父及子）进行传递，Context可以在多个组件之间共享数据
 // Context 可以让我们无须明确地传遍每一个组件，就能将值深入传递进组件树。
+//Context 主要应用场景在于很多不同层级的组件需要访问同样数据的时候，如管理当前的 locale，theme，或者一些缓存数据，。但是我们需要谨慎使用Context,因为这会使得组件的复用性变差。
+//如果我们只是想避免层层传递一些属性，组件组合是一个比context更好的方案。
 
 // 为当前的 theme 创建一个 context，“light”为默认值，只有当组件所处的树中没有匹配到 Provider 时，其 defaultValue 参数才会生效。
 const ThemeContext = React.createContext('light');
