@@ -187,14 +187,13 @@ ReactDOM.render(<App />, document.getElementById('root'));
 /*错误边界*/
 // 错误边界是一种 React 组件，这种组件可以捕获并打印发生在其子组件树任何位置的 JavaScript 错误，并且，它会渲染出备用 UI，而不是渲染那些崩溃了的子组件树。
 // 错误边界在渲染期间、生命周期方法和整个组件树的构造函数中捕获错误。
+// 当抛出错误后，请使用 static getDerivedStateFromError() 渲染备用 UI ，使用 componentDidCatch() 打印错误信息。
 /*错误边界无法捕获以下场景中产生的错误：
+    1）事件处理
+    2）异步代码（例如 setTimeout 或 requestAnimationFrame 回调函数）
+    3）服务端渲染
+    4）它自身抛出来的错误（并非它的子组件）*/
 
-    事件处理（了解更多）
-    异步代码（例如 setTimeout 或 requestAnimationFrame 回调函数）
-    服务端渲染
-    它自身抛出来的错误（并非它的子组件）*/
-// 注意错误边界仅可以捕获其子组件的错误，它无法捕获其自身的错误。
-// 只有 class 组件才可以成为成错误边界组件
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
@@ -202,24 +201,33 @@ class ErrorBoundary extends React.Component {
     }
 
     static getDerivedStateFromError(error) {
-        // Update state so the next render will show the fallback UI.
+        // 更新 state 使下一次渲染能够显示降级后的 UI
         return { hasError: true };
     }
 
     componentDidCatch(error, info) {
-        // You can also log the error to an error reporting service
+        // 可以将错误日志上报给服务器
         logErrorToMyService(error, info);
     }
 
     render() {
         if (this.state.hasError) {
-            // You can render any custom fallback UI
+            // 可以自定义降级后的 UI 并渲染
             return <h1>Something went wrong.</h1>;
         }
 
         return this.props.children;
     }
 }
+// 然后你可以将它作为一个常规组件去使用：
+
+<ErrorBoundary>
+  <MyWidget />
+</ErrorBoundary>
+// 注意错误边界仅可以捕获其子组件的错误，它无法捕获其自身的错误。
+// 只有 class 组件才可以成为成错误边界组件
+// 错误边界组件可以放在最顶层的路由组件，也可以放在单独的部件以保护其他部分不奔溃
+// 错误边界无法捕获事件处理器内部的错误。如果需要在时间处理器内部捕获错误，使用普通的js try/catch语句
 
 /*refs转发*/
 // Ref转发是一项将ref自动地通过组件传递到其一子组件的技巧
@@ -239,10 +247,14 @@ const ref = React.createRef();
     2、我们通过指定 ref 为 JSX 属性，将其向下传递给 <FancyButton ref={ref}>。
     3、React 传递 ref 给 fowardRef 内函数 (props, ref) => ...，作为其第二个参数。
     4、我们向下转发该 ref 参数到 <button ref={ref}>，将其指定为 JSX 属性。
-    5、当 ref 挂载完成，ref.current 将指向 <button> DOM 节点。*/
+    5、当 ref 挂载完成，ref.current 将指向 <button> DOM 节点。
+ 
+ 注意：
+    1）第二个参数ref只在使用React.forwardRef定义组件时存在。常规函数和class组件不接收ref参数，且props中额不存在ref.
+    2)Ref转发不仅限于DOM组件，也可以转发refs到class组件实例中。
+    3）React.forwardRef不推荐使用，因为它改变了库的行为，并在升级react自身时破坏用户的应用。
+    */
 
-// 我们可以使用 React.forwardRef API 明确地将 refs 转发到内部的 FancyButton 组件。
-// React.forwardRef 接受一个渲染函数，其接收 props 和 ref 参数并返回一个 React 节点。
 function logProps(Component) {
     class LogProps extends React.Component {
         componentDidUpdate(prevProps) {
@@ -269,6 +281,7 @@ function logProps(Component) {
 
 /*FragMents*/
 // React 中的一个常见模式是一个组件返回多个元素。Fragments 允许你将子列表分组，而无需向 DOM 添加额外节点。
+// 也可以使用<></>空标签来声明Fragments.
 function Glossary(props) {
     return (
         <dl>
