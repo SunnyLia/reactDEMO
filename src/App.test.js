@@ -420,56 +420,82 @@ function Story(props) {
 // 二、JSX中的Props
 // 1、JavaScript表达式作为Props
 // 可以把包裹在{}中的JavaScript表达式作为一个prop传递给JSX元素
-<MyComponent foo={1 + 2 + 3 + 4} />
+    <MyComponent foo={1 + 2 + 3 + 4} />
 // if语句及for循环不是JavaScript表达式，所以不能再JSX中直接使用，可以用在jsx以外的代码中。
 // 2、字符串字面量
+    <MyComponent message="hello world" />
 // 3、Props默认值为"True"
-// 4、...展开运算符，用来在JSX中传递整个props对象
+    <MyTextBox autocomplete />
+// 4、...展开运算符
 // 缺点：很容易讲不必要的props传递给不相干的组件，或者将无效的HTML熟悉传递给DOM
-function App1() {
-    return <Greeting firstName="Ben" lastName="Hector" />;
-}
-
-function App2() {
-    const props = { firstName: 'Ben', lastName: 'Hector' };
-    return <Greeting {...props} />;
-}
+   // 使用展开运算符 ... 来在JSX中传递整个props对象
+    function App1() {
+        return <Greeting firstName="Ben" lastName="Hector" />;
+    }
+    function App2() {
+        const props = { firstName: 'Ben', lastName: 'Hector' };
+        return <Greeting {...props} />;
+    }
+  // 只保留当前组件需要接收的props，使用展开运算符将其他props传递下去
+   const Button = props => {
+      const { kind, ...other } = props;
+      return <button className={kind} {...other} />;
+   };
+   <Button kind="primary" onClick={() => console.log("clicked!")}>
+        Hello World!
+   </Button>
 
 // 三、JSX中的子元素
 // 包含在开始和结束标签之间的jsx表达式内容将作为特定属性props.children传递给外层组件。
 // 传递子元素的方法：
 // 1、字符串字面量
-<MyComponent>Hello world!</MyComponent>
-    // 2、JSX子元素
+   <MyComponent>Hello world!</MyComponent>
+    //此时MyComponent中的props.children就是字符串“Hello world!”
+
+// 2、JSX子元素
     <MyContaine1r>
         <MyFirstComponent />
         <MySecondComponent />
     </MyContaine1r>
+
 // 3、JavaScript表达式作为子元素
-// JavaScript 表达式可以被包裹在 {} 中作为子元素
-function Item(props) {
-    return <li>{props.message}</li>;
-}
+    // JavaScript 表达式可以被包裹在 {} 中作为子元素
+    function Item(props) {
+        return <li>{props.message}</li>;
+    }
 
 // 4、函数作为子元素
-// 你可以将任何东西作为子元素传递给自定义组件，只要确保在该组件渲染之前能够被转换成 React 理解的对象。
-// 调用子元素回调 numTimes 次，来重复生成组件
-function Repeat(props) {
-    let items = [];
-    for (let i = 0; i < props.numTimes; i++) {
-        items.push(props.children(i));
+    // 可以把回调函数作为 props.children 进行传递给自定义组件
+    // 调用子元素回调 numTimes 次，来重复生成组件
+    function Repeat(props) {
+        let items = [];
+        for (let i = 0; i < props.numTimes; i++) {
+            items.push(props.children(i));
+        }
+        return <div>{items}</div>;
     }
-    return <div>{items}</div>;
-}
 
-function ListOfTenThings() {
-    return (
-        <Repeat numTimes={10}>
-            {(index) => <div key={index}>This is item {index} in the list</div>}
-        </Repeat>
-    );
-}
+    function ListOfTenThings() {
+        return (
+            <Repeat numTimes={10}>
+                {(index) => <div key={index}>This is item {index} in the list</div>}
+            </Repeat>
+        );
+    }
 // 5、布尔类型，Null以及Undefined将会被忽略，不会被渲染
+    //注意点：
+     //1)当 props.messages 是空数组时，0 仍然会被渲染
+        <div>
+          //{props.messages.length && //这样会被渲染
+          {props.messages.length > 0 && //这样不会渲染
+            <MessageList messages={props.messages} />
+          }
+        </div>
+     //2)如果想渲染false、true、null、undefined 等值，你需要先将它们转换为字符串
+        <div>
+          My JavaScript variable is {String(myVariable)}.
+        </div>
+
 
 /*性能优化*/
 // 一、使用生产版本
