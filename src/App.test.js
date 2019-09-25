@@ -500,6 +500,7 @@ function Story(props) {
 /*性能优化*/
 // 一、使用生产版本
 // 推荐你在开发应用时使用开发模式，而在为用户部署应用时使用生产模式。
+// 通过 Create React App 构建的项目，在生产部署前运行npm run build在项目下的 build/ 目录中生成对应的生产版本。正常开发使用 npm start 即可。
 // 二、使用Chrome Performance标签分析组件
 // 能帮助你查看是否有不相关的组件被错误地更新，以及 UI 更新的深度和频率。
 // 三、使用React开发者工具中的分析器对组件进行分析
@@ -508,6 +509,10 @@ function Story(props) {
 // react-window和react-virtualized是热门的虚拟滚动库。他们提供了多种可复用的组件，用于展示列表、网格和表格数据。
 // 五、避免调停
 // 如果我们知道在什么情况下组件不需要更新，可以在shouldComponentUpdate中返回false来跳过整个渲染过程。其中包括该组件的render调用以及之后的操作
+// 六、通过使用shouldComponentUpdate减少render调用次数
+// 七、避免可变对象的产生
+// Object.assign 以及对象扩展运算符
+
 // 示例
 // 如果你的组件只有当 props.color 或者 state.count 的值改变才需要更新时，你可以使用 shouldComponentUpdate 来进行检查：
 
@@ -555,8 +560,7 @@ class CounterButton extends React.PureComponent {
         );
     }
 }
-// 五、不可变数据的力量
-// 六、使用不可变数据结构
+
 
 /*Portals*/
 // Portal提供了一种将子节点渲染到存在于父组件以外的DOM节点，可以被放置在 DOM 树中的任何地方
@@ -568,6 +572,7 @@ render() {
         domNode
     );
 }
+// 一个 portal 的典型用例是当父组件有 overflow: hidden 或 z-index 样式时，但你需要子组件能够在视觉上“跳出”其容器。例如，对话框、悬浮卡以及提示框：
 // 一、通过Portal进行事件冒泡
 // 一个从portal内部触发的事件会一直冒泡至包含React树的祖先，即使这些元素并不是DOM树中的祖先。
 
