@@ -301,7 +301,7 @@ function Glossary(props) {
 // 高阶组件是参数为组件，返回值为新组件的函数
 const EnhancedComponent = higherOrderComponent(WrappedComponent);
 // 组件是将 props 转换为 UI，而高阶组件是将组件转换为另一个组件。
-
+// 例如Redux的connect方法，就是HOC的表现。
 
 // 我们可以编写一个创建组件的函数，比如 CommentList 和 BlogPost，订阅 DataSource。
 // 该函数将接受一个子组件作为它的其中一个参数，该子组件将订阅数据作为 prop。让我们调用函数 withSubscription：
@@ -325,6 +325,7 @@ function withSubscription(WrappedComponent, selectData) {
             super(props);
             this.handleChange = this.handleChange.bind(this);
             this.state = {
+                // 假设 "DataSource" 是个全局范围内的数据源变量
                 data: selectData(DataSource, props)
             };
         }
@@ -351,14 +352,38 @@ function withSubscription(WrappedComponent, selectData) {
         }
     };
 }
+/*
+注意：
+    1）HOC不会修改传入的组件，也不会使用继承来复制其行为，相反，HOC通过将组件包装在容器组件中来组成新组件。HOC是纯函数，没有副作用。
+    2）被包装组件接收来自容器组件的所有prop,同时也接收一个新的用于render的data prop。HOC不需要关心数据的使用方式或原因，而被包装组件也不需要关心数据是怎么来的。
+    3）HOC不应该修改传入组件，而应该使用组合的方式，通过将组件包装在容器组件中实现功能。
+        function logProps(WrappedComponent) {
+          return class extends React.Component {
+            componentWillReceiveProps(nextProps) {
+              console.log('Current props: ', this.props);
+              console.log('Next props: ', nextProps);
+            }
+            render() {
+              // 将 input 组件包装在容器中，而不对其进行修改。Good!
+              return <WrappedComponent {...this.props} />;
+            }
+          }
+        }
+    4）HOC与容器组件之前的区别：
+        容器组件担任分离将高层和底层关注的责任，由容器管理订阅和状态，并将prop传递给处理渲染UI。
+        HOC使用容器作为其实现的一部分，可以将HOC视为参数化容器组件。
+    5)不要在render方法中使用HOC
+*/
+
 
 
 /*深入JSX */
 // 一、指定React元素类型
+// JSX 标签的第一部分指定了 React 元素的类型
 // 1、React必须在作用域内
 // 由于JSX会编译未React.createElement调用形式，所以React库也必须包含在JSX代码作用域内。
 // 2、在JSX类型中使用点语法
-// 当在一个木块中导出许多React组件时，可以使用点语法引入一个React组件。
+// 当在一个模块中导出许多React组件时，可以使用点语法引入一个React组件。
 import React from 'react';
 
 const MyComponents = {
@@ -366,11 +391,14 @@ const MyComponents = {
         return <div>Imagine a {props.color} datepicker here.</div>;
     }
 }
-
+// 例如，如果 MyComponents.DatePicker 是一个组件，你可以在 JSX 中直接使用：
 function BlueDatePicker() {
     return <MyComponents.DatePicker color="blue" />;
 }
 // 3、用户定义得组件必须以大写字母开头
+ //   1)以小写字母开头的元素代表一个HTML内置组件，比如<div>会生成相应的字符串传递给React.breateElement(作为参数)
+ //   2）大写字母开头的元素则对应着在JavaScript引入或者定义的组件，如<Foo />会编译为React.createElement(Foo)
+
 // 4、动态选择JSX类型
 // 你不能将通用表达式作为React元素类型。如果你想通过通用表达式来动态来决定元素类型，需要先将它赋值给大写字母开头得变量。
 import React from 'react';
