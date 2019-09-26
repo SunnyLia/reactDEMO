@@ -581,16 +581,31 @@ render() {
 // 一、Diffing算法
 // 当对比两棵树时，React首先比较两棵树的根节点。
 // 1、比对不同类型的元素
-// 当根节点为不同类型的元素是，React会拆卸原有的树并建立起新的树。当拆卸一棵树时，对应的DOM节点也会被销毁。
-// 当拆卸一颗树时，对应的 DOM 节点也会被销毁。组件实例将执行 componentWillUnmount() 方法。
-// 当建立一颗新的树时，对应的 DOM 节点会被创建以及插入到 DOM 中。组件实例将执行 componentWillMount() 方法，紧接着 componentDidMount() 方法。所有跟之前的树所关联的 state 也会被销毁。
+    // 1)当根节点为不同类型的元素，React会拆卸原有的树并建立起新的树。比如<a>变成<img>，<Button>变成<div>
+    // 2)当拆卸一颗树时，对应的 DOM 节点也会被销毁。组件实例将执行 componentWillUnmount() 方法。
+    // 3)当建立一颗新的树时，对应的 DOM 节点会被创建以及插入到 DOM 中。组件实例将执行 componentWillMount() 方法，紧接着 componentDidMount() 方法。所有跟之前的树所关联的 state 也会被销毁。
+    // 4)在根节点以下的组件也会被卸载，他们的状态会被销毁。
+    <div><Counter /></div>
+    <span><Counter /></span>
+    //React 会销毁 Counter 组件并且重新装载一个新的组件。
+
 // 2、比对同一类型的元素
-// 当比对两个相同类型的React元素时，React会保留DOM节点，仅比对及更新有改变的属性。在处理完当前节点之后，React继续对子节点进行递归
+    // 1)当比对两个相同类型的React元素时，React会保留DOM节点，仅比对及更新有改变的属性。
+    // 2)当更新 style 属性时，React 仅更新有所更变的属性。
+    <div className="before" title="stuff" />
+    <div className="after" title="stuff" />
+    //通过比对这两个元素，React 知道只需要修改 DOM 元素上的 className 属性。
+    
+    <div style={{color: 'red', fontWeight: 'bold'}} />
+    <div style={{color: 'green', fontWeight: 'bold'}} />
+    //通过比对这两个元素，React 知道只需要修改 DOM 元素上的 color 样式，无需修改 fontWeight。
+    //在处理完当前节点之后，React继续对子节点进行递归
 // 3、比对同类型的组件元素
-// 当一个组件更新时，组件实例保持不变，这样state在跨越不同的渲染时保持一致。React将更新该组件实例的props以跟最新的元素保持一致，并调用该实例的componentWillReceiveProps() 和 componentWillUpdate() 方法.
-// 下一步，调用render()方法，diff算法将在之前的结果以及新的结果中进行递归
+    // 1)当一个组件更新时，组件实例保持不变，这样state在跨越不同的渲染时保持一致。
+    // 2)React将更新该组件实例的props以跟最新的元素保持一致，并调用该实例的componentWillReceiveProps() 和 componentWillUpdate() 方法.
+    // 3)下一步，调用render()方法，diff算法将在之前的结果以及新的结果中进行递归
 // 4、对子节点进行递归
-// 默认条件下，当递归DOM节点的子元素时，React会同时遍历两个子元素的列表；当产生差异时，生成一个mutation。
+    // 默认条件下，当递归DOM节点的子元素时，React会同时遍历两个子元素的列表；当产生差异时，生成一个mutation。
 // 5、Keys
 // 当子元素拥有key时，React使用key来匹配原有树上的子元素以及最新树上的子元素。key能让转换变得更高效
 // key可以不需要全局唯一，但是再列表中必须保持唯一
