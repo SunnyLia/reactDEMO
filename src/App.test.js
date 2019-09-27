@@ -777,12 +777,91 @@ render() {
         );
       }
     }
+    // 要获得这个行为，只要渲染一个带有 render prop 的 <Mouse> 组件就能够告诉它当前鼠标坐标 (x, y) 要渲染什么。
+
+/*静态类型检查*/
+    //Flow 和 TypeScript 等这些静态类型检查器，可以在运行前识别某些类型的问题。他们还可以通过增加自动补全等功能来改善开发者的工作流程。
+    //在大型代码库中建议使用 Flow 或 TypeScript 来代替 PropTypes。
+    // 一、FLOW
+        //Flow 是一个针对 JavaScript 代码的静态类型检测器。Flow 由 Facebook 开发，经常与 React 一起使用。Flow 通过特殊的类型语法为变量，函数，以及 React 组件提供注解，帮助你尽早地发现错误。
+    //二、TypeScript
+        //TypeScript 是一种由微软开发的编程语言。它是 JavaScript 的一个类型超集，包含独立的编译器。作为一种类型语言，TypeScript 可以在构建时发现 bug 和错误，这样程序运行时就可以避免此类错误。
+        //在 TypeScript 中，提供两种文件扩展名：
+            //.ts 是默认的文件扩展名，而 .tsx 是一个用于包含 JSX 代码的特殊扩展名。
+    //三、Reason
+        //Reason是由 Facebook 开发,不是一种新的语言；它是一种新的语法和工具链，底层使用的是经过实战验证的 OCaml 语言。Reason 在 OCaml 之上提供了 JavaScript 程序员的熟悉语法，而且集成了现有的 NPM/Yarn 工作流。
+
+    
+/*PropTypes类型检查*/
+    //PropTypes 提供一系列验证器，可用于确保组件接收到的props数据类型是有效的。
+    import PropTypes from 'prop-types';
+    class Greeting extends React.Component {
+      render() {
+        return (
+          <h1>Hello, {this.props.name}</h1>
+        );
+      }
+    }
+
+    Greeting.propTypes = {
+      name: PropTypes.string
+    };
+    //在本例中, 我们使用了 PropTypes.string。当传入的 prop 值类型不正确时，JavaScript 控制台将会显示警告。出于性能方面的考虑，propTypes 仅在开发模式下进行检查。
 
 
+/*严格模式*/
+    //StrictMode 是一个用来突出显示应用程序中潜在问题的工具。与 Fragment 一样，StrictMode 不会渲染任何可见的 UI。它为其后代元素触发额外的检查和警告。
+    /*作用：
+        识别不安全的生命周期
+        关于使用过时字符串 ref API 的警告
+        关于使用废弃的 findDOMNode 方法的警告
+        检测意外的副作用
+        检测过时的 context API
+    */
+    //React 可能在提交之前多次调用渲染阶段生命周期的方法，所以不要在这些方法的内部编写副作用相关的代码，这点非常重要。
+    /*渲染阶段的生命周期包括以下 class 组件方法：
+        constructor
+        componentWillMount
+        componentWillReceiveProps
+        componentWillUpdate
+        getDerivedStateFromProps
+        shouldComponentUpdate
+        render
+        setState 更新函数（第一个参数）
+    */
 
+/*非受控组件*/
+    //在大多数情况下，我们推荐使用 受控组件 来处理表单数据。在一个受控组件中，表单数据是由 React 组件来管理的。
+    //另一种替代方案是使用非受控组件，这时表单数据将交由 DOM 节点来处理。
+    lass NameForm extends React.Component {
+      constructor(props) {
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.input = React.createRef();
+      }
 
+      handleSubmit(event) {
+        alert('A name was submitted: ' + this.input.current.value);
+        event.preventDefault();
+      }
 
-
+      render() {
+        return (
+          <form onSubmit={this.handleSubmit}>
+            <label>
+              Name:
+              <input type="text" ref={this.input} />
+            </label>
+            <input type="submit" value="Submit" />
+          </form>
+        );
+      }
+    }
+   
+    //1)默认值
+        //<input type="checkbox"> 和 <input type="radio"> 支持 defaultChecked属性，<input>、<select> 和 <textarea> 支持 defaultValue属性。
+    //2)文件输入
+        //在 React 中，<input type="file" /> 始终是一个非受控组件，因为它的值只能由用户设置，而不能通过代码控制。
 
 
 
