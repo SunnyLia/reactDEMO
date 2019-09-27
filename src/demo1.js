@@ -1249,9 +1249,13 @@ render() {
         //在 React 中，<input type="file" /> 始终是一个非受控组件，因为它的值只能由用户设置，而不能通过代码控制。
 
 
-
-
-
+/*React.Component*/
+  class Welcome extends React.Component {
+    render() {
+      return <h1>Hello, {this.props.name}</h1>;
+    }
+  }
+  //1)在 React.Component 的子类中有个必须定义的 render() 函数。
 
 
 
