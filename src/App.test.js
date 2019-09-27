@@ -606,35 +606,118 @@ render() {
     // 3)下一步，调用render()方法，diff算法将在之前的结果以及新的结果中进行递归
 // 4、对子节点进行递归
     // 默认条件下，当递归DOM节点的子元素时，React会同时遍历两个子元素的列表；当产生差异时，生成一个mutation。
+    // 在子元素列表末尾新增元素时，更变开销比较小。
+    // 在列表头部插入会很影响性能，那么更变开销会比较大。为了解决这种问题，可以在列表中使用唯一ID做key属性，让React更准确的对比出哪些元素是新增的，哪些只是移动了。
 // 5、Keys
-// 当子元素拥有key时，React使用key来匹配原有树上的子元素以及最新树上的子元素。key能让转换变得更高效
-// key可以不需要全局唯一，但是再列表中必须保持唯一
+    // 当子元素拥有key时，React使用key来匹配原有树上的子元素以及最新树上的子元素。
+    // 1）key可以不需要全局唯一，但是再列表中必须保持唯一
+    // 2)不建议使用元素在数组中的下标作为key，这种在元素不尽兴重新排序的时候比较合适，但一旦有顺序修改，diff就会变得慢
 
 
 /*Refs&DOM*/
 // Refs提供了一种方式，允许我们访问DOM节点或在render方法中创建的React元素。
 // 一、何时使用Refs
-// 1、管理焦点，文本选择或媒体播放
-// 2、触发强制动画
-// 3、集成第三方DOM库
-// 避免使用refs来做任何可以通过声明式实现来完成的事情
+    // 1、管理焦点，文本选择或媒体播放
+    // 2、触发强制动画
+    // 3、集成第三方DOM库
+    // 避免使用refs来做任何可以通过声明式实现来完成的事情。举个例子，避免在 Dialog 组件里暴露 open() 和 close() 方法，最好传递 isOpen 属性。
+
 // 二、勿过度使用Refs
-// 通常，让更高层级的组件拥有state是更恰当的
+    // 通常，让更高层级的组件拥有state是更恰当的
 // 三、创建Refs
-// Refs是使用React.createRef()创建得，并通过ref属性附加到React元素。再构造组件时，通常将Refs分配给实例属性，以便可以再整个组件中引用她们
-class MyComponent extends React.Component {
-    constructor(props) {
-        super(props);
-        this.myRef = React.createRef();
-    }
-    render() {
-        return <div ref={this.myRef} />;
-    }
-}
+    // Refs是使用React.createRef()创建得，并通过ref属性附加到React元素。在构造组件时，通常将Refs分配给实例属性，以便可以再整个组件中引用她们
 // 四、访问Refs
-// 当 ref 被传递给 render 中的元素时，对该节点的引用可以在 ref 的 current 属性中被访问。
-const node = this.myRef.current;
-// ref 的值根据节点的类型而有所不同：
-// 1、当 ref 属性用于 HTML 元素时，构造函数中使用 React.createRef() 创建的 ref 接收底层 DOM 元素作为其 current 属性。
-// 2、当 ref 属性用于自定义 class 组件时，ref 对象接收组件的挂载实例作为其 current 属性。
-// 3、你不能在函数组件上使用 ref 属性，因为他们没有实例。
+    // 当 ref 被传递给 render 中的元素时，对该节点的引用可以在 ref 的 current 属性中被访问。
+    // ref 的值根据节点的类型而有所不同：
+        // 1、当 ref 属性用于 HTML 元素时，构造函数中使用 React.createRef() 创建的 ref 接收底层 DOM 元素作为其 current 属性。
+        // 2、当 ref 属性用于自定义 class 组件时，ref 对象接收组件的挂载实例作为其 current 属性。
+        // 3、你不能在函数组件上使用 ref 属性，因为他们没有实例。
+    //1）为 DOM 元素添加 ref 实例
+        class CustomTextInput extends React.Component {
+          constructor(props) {
+            super(props);
+            // 创建一个 ref 来存储 textInput 的 DOM 元素
+            this.textInput = React.createRef();
+            this.focusTextInput = this.focusTextInput.bind(this);
+          }
+
+          focusTextInput() {
+            // 直接使用原生 API 使 text 输入框获得焦点
+            // 注意：我们通过 "current" 来访问 DOM 节点
+            this.textInput.current.focus();
+          }
+
+          render() {
+            // 告诉 React 我们想把 <input> ref 关联到构造器里创建的 `textInput` 上
+            return (
+              <div>
+                <input type="text" ref={this.textInput} />
+                <input type="button" value="Focus the text input" onClick={this.focusTextInput} />
+              </div>
+            );
+          }
+        }
+    
+    //2）为 class 组件添加 Ref
+        class AutoFocusTextInput extends React.Component {
+          constructor(props) {
+            super(props);
+            this.textInput = React.createRef();
+          }
+
+          componentDidMount() {
+            this.textInput.current.focusTextInput();
+          }
+
+          render() {
+            return (
+               //只有在 CustomTextInput 声明为 class 时才有效
+              <CustomTextInput ref={this.textInput} /> 
+            );
+          }
+        }
+        class CustomTextInput extends React.Component {
+          // ...
+        }
+     //3） Refs 与函数组件
+        class Parent extends React.Component {
+          constructor(props) {
+            super(props);
+            this.textInput = React.createRef();
+          }
+          render() {
+            //你不能在函数组件上使用 ref 属性，因为它们没有实例。如果你需要使用 ref，你应该将组件转化为一个 class，
+            return (
+              <MyFunctionComponent ref={this.textInput} />
+            );
+          }
+        }
+        function MyFunctionComponent() {
+          return <input />;
+        }
+  //五、将 DOM Refs 暴露给父组件
+    // 在极少数情况下，你可能希望在父组件中引用子节点的 DOM 节点。通常不建议这样做，因为它会打破组件的封装，但它偶尔可用于触发焦点或测量子 DOM 节点的大小或位置。
+    // 推荐使用ref转发
+
+  //六、回调Refs
+    // React 也支持另一种设置 refs 的方式，称为“回调 refs”。它能助你更精细地控制何时 refs 被设置和解除。
+    // 不同于传递 createRef() 创建的 ref 属性，你会传递一个函数。这个函数中接受 React 组件实例或 HTML DOM 元素作为参数，以使它们能在其他地方被存储和访问。
+    function CustomTextInput(props) {
+      return (
+        <div>
+          <input ref={props.inputRef} />
+        </div>
+      );
+    }
+
+    class Parent extends React.Component {
+      render() {
+        return (
+          <CustomTextInput
+            inputRef={el => this.inputElement = el}
+          />
+        );
+      }
+    }
+    
+    // 如果 ref 回调函数是以内联函数的方式定义的，在更新过程中它会被执行两次，第一次传入参数 null，然后第二次会传入参数 DOM 元素。这是因为在每次渲染时会创建一个新的函数实例，所以 React 清空旧的 ref 并且设置新的。通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题，但是大多数情况下它是无关紧要的。
