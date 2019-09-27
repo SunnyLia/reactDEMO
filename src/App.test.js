@@ -721,3 +721,72 @@ render() {
     }
     
     // 如果 ref 回调函数是以内联函数的方式定义的，在更新过程中它会被执行两次，第一次传入参数 null，然后第二次会传入参数 DOM 元素。这是因为在每次渲染时会创建一个新的函数实例，所以 React 清空旧的 ref 并且设置新的。通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题，但是大多数情况下它是无关紧要的。
+
+/*Render Props*/
+    //“render prop” 是指一种在 React 组件之间使用一个值为函数的 prop 共享代码的简单技术
+    //具有 render prop 的组件接受一个函数，该函数返回一个 React 元素并调用它而不是实现自己的渲染逻辑。
+    //更具体地说，render prop 是一个用于告知组件需要渲染什么内容的函数 prop。
+
+    //例如，以下组件跟踪 Web 应用程序中的鼠标位置：
+    class Cat extends React.Component {
+      render() {
+        const mouse = this.props.mouse;
+        return (
+          <img src="/cat.jpg" style={{ position: 'absolute', left: mouse.x, top: mouse.y }} />
+        );
+      }
+    }
+
+    class Mouse extends React.Component {
+      constructor(props) {
+        super(props);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.state = { x: 0, y: 0 };
+      }
+
+      handleMouseMove(event) {
+        this.setState({
+          x: event.clientX,
+          y: event.clientY
+        });
+      }
+
+      render() {
+        return (
+          <div style={{ height: '100%' }} onMouseMove={this.handleMouseMove}>
+
+            {/*
+              Instead of providing a static representation of what <Mouse> renders,
+              use the `render` prop to dynamically determine what to render.
+            */}
+            {this.props.render(this.state)}
+          </div>
+        );
+      }
+    }
+
+    class MouseTracker extends React.Component {
+      render() {
+        return (
+          <div>
+            <h1>移动鼠标!</h1>
+            <Mouse render={mouse => (
+              <Cat mouse={mouse} />
+            )}/>
+          </div>
+        );
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
