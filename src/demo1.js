@@ -1256,10 +1256,97 @@ render() {
     }
   }
   //1)在 React.Component 的子类中有个必须定义的 render() 函数。
+  //2)组件的生命周期
+    /*
+    a)挂载阶段
+      constructor()
+      static getDerivedStateFromProps()
+      render()
+      componentDidMount()
+    b)更新阶段
+      static getDerivedStaeFromProps()
+      shouldComponentUpdate()
+      render()
+      getSnapshotBeforeUpdate()
+      componentDidUpdate()
+    c)卸载阶段
+      componentWillUnmount()
+    d)错误处理
+      static getDerivedStateFromError()
+    e)其他
+      setState()
+      forceUpdate()
+    f)class属性
+      defaultProps
+      displayName
+    g)实例属性
+      props
+      state
+    */
+  
+  //3)render()
+    /*
+    当render被调用时，它会检查this.props和this.state的变化并返回以下类型：
+      a)react元素。通常通过JSX创建。例如，<div />会被react渲染为DOM节点，<MyCompont />会被react渲染为自定义组件，无论是div还是MyComponent均为React元素。
+      b)数组或fragments。使得render方法可以返回多个元素。
+      c)Portals。可以渲染子节点到不同的DOM子树中。
+      d)字符串或数值类型。在DOM中会被渲染为文本节点。
+      e)布尔类型或null。什么都不渲染
+    
+    render()函数应该为纯函数，这意味着在不修改组件state的情况下，每次调用时都返回相同的结果，并且他不会直接与浏览器交互。
+    如果需要与浏览器进行交互，请在componentDidMount()或其他生命周期方法中执行你的操作。
+    如果shouldComponentUpdate()返回false，则不会调用render()
+    */
+  //4)constructor()
+    //如果不初始化state或不进行方法绑定，则不需要为React组件实现构造函数。
+    //在React组件挂载之前，会调用它的构造函数。在为React.Component子类实现构造函数时，应在其他语句之前调用super(props),否则，this.props在构造函数中可能会出现未定义的bug.
+    //通常，在react中，构造函数仅用于以下两种情况：
+        //a)通过给this.state赋值对象来初始化内部state.
+        //b)为事件处理函数绑定实例
+    //在constructor()函数中不要调用setState()方法。如果你的组件需要使用内部state，请直接再构造函数中为this.state赋值初始化state：
+        constructor(props) {
+          super(props);
+          // 不要在这里调用 this.setState()
+          this.state = { counter: 0 };
+          this.handleClick = this.handleClick.bind(this);
+        }
+    //只能在构造函数中直接为this.state赋值，如在其他方法中赋值，应该使用this.setState()代替。
+    //避免将props的值复制给state，因为这样做毫无必要（你可以直接使用this.props.color）,同时还产生了bug（更新props中的color时，并不会影响state）
+      constructor(props) {
+       super(props);
+       // 不要这样做
+       this.state = { color: props.color };
+      }
+  //5)componentDidMount()
+    //componentDidMount()会在组件挂载后（插入DOM树中）立即调用。依赖于DOM节点的初始化应该放在这里。如通过网络请求获取数据，此处是实例化请求的好地方。
+    //这个方法是比较适合添加订阅的地方。如果添加了订阅，请不要忘记在 componentWillUnmount() 里取消订阅
+    //可以在 componentDidMount() 里可以直接调用 setState()。它将触发额外渲染，但此渲染会发生在浏览器更新屏幕之前。如此保证了即使在 render() 两次调用的情况下，用户也不会看到中间状态。
+    //请谨慎使用该模式，因为它会导致性能问题。通常，你应该在 constructor() 中初始化 state。如果你的渲染依赖于 DOM 节点的大小或位置，比如实现 modals 和 tooltips 等情况下，你可以使用此方式处理
+  //6)componentDidUpdate()
+    //componentDidUpdate() 会在更新后会被立即调用。首次渲染不会执行此方法。
+    //当组件更新后，可以在此处对 DOM 进行操作。如果你对更新前后的 props 进行了比较，也可以选择在此处进行网络请求。
+    componentDidUpdate(prevProps) {
+      // 典型用法（不要忘记比较 props）：
+      if (this.props.userID !== prevProps.userID) {
+        this.fetchData(this.props.userID);
+      }
+    }
+    //你也可以在 componentDidUpdate() 中直接调用 setState()，但请注意它必须被包裹在一个条件语件里，正如上述的例子那样进行处理，否则会导致死循环。它还会导致额外的重新渲染，虽然用户不可见，但会影响组件性能。不要将 props “镜像”给 state，请考虑直接使用 props。 
+    //如果 shouldComponentUpdate() 返回值为 false，则不会调用 componentDidUpdate()。
+  //7)componentWillUnmount()
+    //componentWillUnmount() 会在组件卸载及销毁之前直接调用。在此方法中执行必要的清理操作，例如，清除 timer，取消网络请求或清除在 componentDidMount() 中创建的订阅等。
+    //componentWillUnmount() 中不应调用 setState()，因为该组件将永远不会重新渲染。组件实例卸载后，将永远不会再挂载它。
+  //8)setState()
+    //setState() 将对组件 state 的更改排入队列，并通知 React 需要使用更新后的 state 重新渲染此组件及其子组件。这是用于更新用户界面以响应事件处理器和处理服务器数据的主要方式
+    //将 setState() 视为请求而不是立即更新组件的命令。为了更好的感知性能，React 会延迟调用它，然后通过一次传递更新多个组件。React 并不会保证 state 的变更会立即生效。
+    //setState() 并不总是立即更新组件。它会批量推迟更新。这使得在调用 setState() 后立即读取 this.state 成为了隐患。为了消除隐患，请使用 componentDidUpdate 或者 setState 的回调函数（setState(updater, callback)），这两种方式都可以保证在应用更新后触发。
+    //除非 shouldComponentUpdate() 返回 false，否则 setState() 将始终执行重新渲染操作。如果可变对象被使用，且无法在 shouldComponentUpdate() 中实现条件渲染，那么仅在新旧状态不一时调用 setState()可以避免不必要的重新渲染
+    //setState(updater[, callback])
+      //第一个updater函数接收state 和 props两个参数，其返回值会将传入的对象浅层合并到新的 state 中。
+      //第二个callback回调函数为可选，可以在 setState 完成合并并重新渲染组件后执行。通常，我们建议使用 componentDidUpdate() 来代替此方式。
 
 
-
-
+/**/
 
 
 
