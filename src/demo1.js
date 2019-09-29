@@ -1346,7 +1346,54 @@ render() {
       //第二个callback回调函数为可选，可以在 setState 完成合并并重新渲染组件后执行。通常，我们建议使用 componentDidUpdate() 来代替此方式。
 
 
-/**/
+/*ReactDOM*/
+    //如果你使用一个 <script> 标签引入 React，所有的顶层 API 都能在全局 ReactDOM 上调用。如果你使用 npm 和 ES6，你可以用 import ReactDOM from 'react-dom'。如果你使用 npm 和 ES5，你可以用 var ReactDOM = require('react-dom')。
+    //1)浏览器支持
+      //React 支持所有的现代浏览器，包括 IE9 及以上版本，但是需要为旧版浏览器比如 IE9 和 IE10 引入相关的 polyfills 依赖
+
+/*DOM 元素*/
+    //1)在 React 中，所有的 DOM 特性和属性（包括事件处理）都应该是小驼峰命名的方式。例如，与 HTML 中的 tabindex 属性对应的 React 的属性是 tabIndex。
+    //2)React 与 HTML 之间有很多属性存在差异：
+        /*
+        a)checked
+          当 <input> 组件的 type 类型为 checkbox 或 radio 时，组件支持 checked 属性。你可以使用它来设置组件是否被选中。这对于构建受控组件（controlled components）很有帮助。而 defaultChecked 则是非受控组件的属性，用于设置组件首次挂载时是否被选中。
+        b)className
+          className 属性用于指定 CSS 的 class，此特性适用于所有常规 DOM 节点和 SVG 元素，如 <div>，<a> 及其它标签。
+        c)dangerouslySetInnerHTML
+          dangerouslySetInnerHTML 是 React 为浏览器 DOM 提供 innerHTML 的替换方案。
+          通常来讲，使用代码直接设置 HTML 存在风险，因为很容易无意中使用户暴露于跨站脚本（XSS）的攻击。
+          function createMarkup() {
+            return {__html: 'First &middot; Second'};
+          }
+
+          function MyComponent() {
+            return <div dangerouslySetInnerHTML={createMarkup()} />;
+          }
+        d)htmlFor
+          由于 for 在 JavaScript 中是保留字，所以 React 元素中使用了 htmlFor 来代替。
+        e)onChange
+          每当表单字段变化时，该事件都会被触发。我们故意没有使用浏览器已有的默认行为，是因为 onChange 在浏览器中的行为和名称不对应，并且 React 依靠了该事件实时处理用户输入。
+        f)selected
+          <option> 组件支持 selected 属性。你可以使用该属性设置组件是否被选择。这对构建受控组件很有帮助。
+        g)style
+          通常不推荐将 style 属性作为设置元素样式的主要方式。在多数情况下，应使用 className 属性来引用外部 CSS 样式表中定义的 class。style 在 React 应用中多用于在渲染过程中添加动态计算的样式。
+          style 接受一个采用小驼峰命名属性的 JavaScript 对象，而不是 CSS 字符串。这与 DOM 中 style 的 JavaScript 属性是一致的，同时会更高效的，且能预防跨站脚本（XSS）的安全漏洞。
+          const divStyle = {
+            color: 'blue',
+            backgroundImage: 'url(' + imgUrl + ')',
+          };
+
+          function HelloWorldComponent() {
+            return <div style={divStyle}>Hello World!</div>;
+          }
+         h)value
+          <input> 和 <textarea> 组件支持 value 属性。你可以使用它为组件设置 value。这对于构建受控组件是非常有帮助。defaultValue 属性对应的是非受控组件的属性，用于设置组件第一次挂载时的 value。
+        */
+
+
+
+
+
 
 
 
