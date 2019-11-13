@@ -1282,6 +1282,7 @@ render() {
       componentWillUnmount()
     d)错误处理
       static getDerivedStateFromError()
+      componentDidCatch()
     e)其他
       setState()
       forceUpdate()
@@ -1345,7 +1346,11 @@ render() {
   //7)componentWillUnmount()
     //componentWillUnmount() 会在组件卸载及销毁之前直接调用。在此方法中执行必要的清理操作，例如，清除 timer，取消网络请求或清除在 componentDidMount() 中创建的订阅等。
     //componentWillUnmount() 中不应调用 setState()，因为该组件将永远不会重新渲染。组件实例卸载后，将永远不会再挂载它。
-  //8)setState()
+  //8)shouldComponentUpdate()
+    //当 props 或 state 发生变化时，shouldComponentUpdate() 会在渲染执行之前被调用。返回值默认为 true。首次渲染或使用 forceUpdate() 时不会调用该方法。
+    //此方法仅作为性能优化的方式而存在。不要企图依靠此方法来“阻止”渲染，因为这可能会产生 bug。你应该考虑使用内置的 PureComponent 组件，而不是手动编写 shouldComponentUpdate()。PureComponent 会对 props 和 state 进行浅层比较，并减少了跳过必要更新的可能性
+    //我们不建议在 shouldComponentUpdate() 中进行深层比较或使用 JSON.stringify()。这样非常影响效率，且会损害性能。
+  //9)setState()
     //setState() 将对组件 state 的更改排入队列，并通知 React 需要使用更新后的 state 重新渲染此组件及其子组件。这是用于更新用户界面以响应事件处理器和处理服务器数据的主要方式
     //将 setState() 视为请求而不是立即更新组件的命令。为了更好的感知性能，React 会延迟调用它，然后通过一次传递更新多个组件。React 并不会保证 state 的变更会立即生效。
     //setState() 并不总是立即更新组件。它会批量推迟更新。这使得在调用 setState() 后立即读取 this.state 成为了隐患。为了消除隐患，请使用 componentDidUpdate 或者 setState 的回调函数（setState(updater, callback)），这两种方式都可以保证在应用更新后触发。
@@ -1362,11 +1367,25 @@ render() {
       this.setState({quantity: 2})
       //stateChange 会将传入的对象将浅层合并到新的 state 中
       //这种形式的 setState() 也是异步的，并且在同一周期内会对多个 setState 进行批处理。后调用的 setState() 将覆盖同一周期内先调用 setState 的值，因此商品数仅增加一次。如果后续状态取决于当前状态，我们建议使用 updater 函数的形式代替
-      
+   //10)forceUpdate()
+      //forceUpdate()会调用 render() 方法强制让组件重新渲染，并且会跳过该组件的 shouldComponentUpdate()
+   //11)defaultProps
+      //defaultProps 可以为 Class 组件添加默认 props。这一般用于 props 未赋值，但又不能为 null 的情况
+
 /*ReactDOM*/
     //如果你使用一个 <script> 标签引入 React，所有的顶层 API 都能在全局 ReactDOM 上调用。如果你使用 npm 和 ES6，你可以用 import ReactDOM from 'react-dom'。如果你使用 npm 和 ES5，你可以用 var ReactDOM = require('react-dom')。
     //1)浏览器支持
       //React 支持所有的现代浏览器，包括 IE9 及以上版本，但是需要为旧版浏览器比如 IE9 和 IE10 引入相关的 polyfills 依赖
+
+/*ReactDOMServer*/
+    //ReactDOMServer 对象允许你将组件渲染成静态标记。通常，它被使用在 Node 服务端上：
+      // ES modules
+      import ReactDOMServer from 'react-dom/server';
+      // CommonJS
+      var ReactDOMServer = require('react-dom/server');
+    //下述方法可以被使用在服务端和浏览器环境。
+      renderToString()
+      renderToStaticMarkup()
 
 /*DOM 元素*/
     //1)在 React 中，所有的 DOM 特性和属性（包括事件处理）都应该是小驼峰命名的方式。例如，与 HTML 中的 tabindex 属性对应的 React 的属性是 tabIndex。
@@ -1406,10 +1425,16 @@ render() {
          h)value
           <input> 和 <textarea> 组件支持 value 属性。你可以使用它为组件设置 value。这对于构建受控组件是非常有帮助。defaultValue 属性对应的是非受控组件的属性，用于设置组件第一次挂载时的 value。
         */
+        
 
+    /*Hook*/
+      //Hook 是 React 16.8 的新增特性。它可以让你在不编写 class 的情况下使用 state 以及其他的 React 特性。
 
-
-
+    /*React 顶层 API*/
+        //1)React.Component
+          //React.Component 是使用 ES6 classes 方式定义 React 组件的基类
+        //React.PureComponent
+          //React.PureComponent 与 React.Component 很相似。两者的区别在于 React.Component 并未实现 shouldComponentUpdate()，而 React.PureComponent 中以浅层对比 prop 和 state 的方式来实现了该函数。
 
 
 
