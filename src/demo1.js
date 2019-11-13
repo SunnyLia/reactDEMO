@@ -1,6 +1,6 @@
 /* JSX简介 */
 // 什么是jsx?
-// jsx是JavaScript得语法扩展，可以很好得描述ui应该呈现出它应有交互得本质形式，还可以使react显示更多有用得错误喝警告消息。
+// jsx是JavaScript得语法扩展，可以很好得描述ui应该呈现出它应有交互得本质形式，还可以使react显示更多有用得错误和警告消息。
 // 1、可以在jsx中用大括号{}包裹嵌入表达式
 // 2、在编译之后，JSX表达式会被转为普通js函数调用，并且对其取值后得到JS对象
 // 3、同一属性不能同时使用引号跟大括号这两种符号，在属性中嵌入js表达式时，不能在大括号外面加上引号。
@@ -16,7 +16,7 @@ const ele1 = React.createElement(
   { className: 'greeting' },
   'hello,world'
 )
-// 等效于 
+// React.createElement() 会预先执行一些检查，以帮助你编写无错代码，但实际上它创建了一个这样的对象：
 // 如下这些对象被称为"react元素"，描述了我们在屏幕上看到的内容。react通过读取这些对象，然后使用他们来构建DOM以及保持随时更新。
 const ele2 = {
   type: 'h1',
@@ -49,6 +49,15 @@ class Welcom extends React.Component {
     return <h1>hello,{this.props.name}</h1>
   }
 }
+
+//使用 create-react-class (如果不使用ES6定义组件)
+var createReactClass = require('create-react-class');
+var Welcom = createReactClass({
+  render: function() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+});
+
 // 自定义组件
 // react 会将JSX所接收的属性转换为单个对象传递给组件，这个对象称为“props”;
 function Welcom(props) {
@@ -1341,11 +1350,19 @@ render() {
     //将 setState() 视为请求而不是立即更新组件的命令。为了更好的感知性能，React 会延迟调用它，然后通过一次传递更新多个组件。React 并不会保证 state 的变更会立即生效。
     //setState() 并不总是立即更新组件。它会批量推迟更新。这使得在调用 setState() 后立即读取 this.state 成为了隐患。为了消除隐患，请使用 componentDidUpdate 或者 setState 的回调函数（setState(updater, callback)），这两种方式都可以保证在应用更新后触发。
     //除非 shouldComponentUpdate() 返回 false，否则 setState() 将始终执行重新渲染操作。如果可变对象被使用，且无法在 shouldComponentUpdate() 中实现条件渲染，那么仅在新旧状态不一时调用 setState()可以避免不必要的重新渲染
-    //setState(updater[, callback])
-      //第一个updater函数接收state 和 props两个参数，其返回值会将传入的对象浅层合并到新的 state 中。
+    
+    //语法1：setState(updater[, callback])
+      //第一个为带有形式参数的 updater 函数:(state, props) => stateChange
+          this.setState((state, props) => {
+            return {counter: state.counter + props.step};
+          });
+          //接收的state 和 props两个参数都保证为最新，其updater函数返回值会将传入的对象浅层合并到新的 state 中。
       //第二个callback回调函数为可选，可以在 setState 完成合并并重新渲染组件后执行。通常，我们建议使用 componentDidUpdate() 来代替此方式。
-
-
+    //语法2：setState(stateChange[, callback])
+      this.setState({quantity: 2})
+      //stateChange 会将传入的对象将浅层合并到新的 state 中
+      //这种形式的 setState() 也是异步的，并且在同一周期内会对多个 setState 进行批处理。后调用的 setState() 将覆盖同一周期内先调用 setState 的值，因此商品数仅增加一次。如果后续状态取决于当前状态，我们建议使用 updater 函数的形式代替
+      
 /*ReactDOM*/
     //如果你使用一个 <script> 标签引入 React，所有的顶层 API 都能在全局 ReactDOM 上调用。如果你使用 npm 和 ES6，你可以用 import ReactDOM from 'react-dom'。如果你使用 npm 和 ES5，你可以用 var ReactDOM = require('react-dom')。
     //1)浏览器支持
