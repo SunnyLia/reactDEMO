@@ -368,23 +368,72 @@
       
     4、监听子组件事件  
         父级组件通过 v-on 监听子组件实例事件，子组件可以通过调用内建的 $emit 方法传入事件名称来触发事件
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    
-    
-    
+        <blog-post
+           v-on:enlarge-text="postFontSize += 0.1"
+        ></blog-post>
+        <button v-on:click="$emit('enlarge-text')">
+           Enlarge text
+        </button>
+      1)使用事件抛出一个值
+          //子组件使用 $emit 的第二个参数来提供一个值
+            <button v-on:click="$emit('enlarge-text', 0.1)">
+              Enlarge text
+            </button>
+          //父级组件通过 $event 访问到被抛出的这个值
+            <blog-post
+              v-on:enlarge-text="postFontSize += $event"
+            ></blog-post>
+          //如果这个事件处理函数是一个方法：
+            <blog-post
+              v-on:enlarge-text="onEnlargeText"
+            ></blog-post>
+          //那么这个值将会作为第一个参数传入这个方法：
+            methods: {
+              onEnlargeText: function (enlargeAmount) {
+                this.postFontSize += enlargeAmount
+              }
+            }
+      2)在组件上使用 v-model
+          Vue.component('custom-input', {
+            props: ['value'],
+            template: `
+              <input
+                v-bind:value="value"
+                v-on:input="$emit('input', $event.target.value)"
+              >
+            `
+          })
+          <custom-input v-model="searchText"></custom-input>
+     5、通过插槽分发内容 <slot>
+          Vue.component('alert-box', {
+            template: `
+              <div class="demo-alert-box">
+                <strong>Error!</strong>
+                <slot></slot>
+              </div>
+            `
+          })
+          <alert-box>
+            Something bad happened.
+          </alert-box>      
+     6、动态组件
+        可以通过 Vue 的 <component> 元素加一个特殊的 is 特性来实现动态切换组件
+        <component v-bind:is="currentTabComponent"></component>
+        在上述示例中，currentTabComponent 可以包括
+          1)已注册组件的名字，或
+          2)一个组件的选项对象
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
