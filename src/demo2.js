@@ -200,17 +200,191 @@
 
 
 
+/*列表渲染*/
+  //用 v-for 把一个数组对应为一组元素
+    <li v-for="item in items">{{ item.message }}</li>
+    <li v-for="(item, index) in items">{{ index }} - {{ item.message }}</li>
+    <div v-for="item of items"></div>
+  //在 v-for 里使用对象
+    <li v-for="value in object">{{ value }}</li>
+    <div v-for="(value, name) in object">{{ name }} : {{ value }}</div>
+    <div v-for="(value, name, index) in object">{{ index }}. {{ name }}: {{ value }}</div>
+  //维护状态
+    当 Vue 正在更新使用 v-for 渲染的元素列表时，它默认使用“就地更新”的策略。但是这种只适用于不依赖子组件状态或临时 DOM 状态 (例如：表单输入值) 的列表渲染输出。
+    为了给 Vue 一个提示，以便它能跟踪每个节点的身份，从而重用和重新排序现有元素，你需要为每项提供一个唯一 key 属性
+    <div v-for="item in items" v-bind:key="item.id"><!-- 内容 --></div>
 
+  //数组更新检测
+    1）变异方法（会改变原始数组）
+      Vue 将被侦听的数组的变异方法进行了包裹，所以它们也将会触发视图更新。
+        push()
+        pop()
+        shift()
+        unshift()
+        splice()
+        sort()
+        reverse()
+    2)非变异方法（不会改变原始数组，而是返回一个新数组）
+        filter()、concat() 和 slice()
+        你可能会认为这将导致 Vue 丢弃现有 DOM 并重新渲染整个列表。但事实并非如此。
+        Vue 为了使得 DOM 元素得到最大范围的重用而实现了一些智能的启发式方法，所以用一个含有相同元素的数组去替换原来的数组是非常高效的操作。
 
+    3）由于 JavaScript 的限制，Vue 不能检测以下数组的变动：
+        //当你利用索引直接设置一个数组项时，例如：vm.items[indexOfItem] = newValue
+        //当你修改数组的长度时，例如：vm.items.length = newLength
 
-
-
-
-
-
-
-
-
-
+  //对象变更检测注意事项
+    1)由于 JavaScript 的限制，Vue 不能检测对象属性的添加或删除：
+      var vm = new Vue({
+        data: {
+          userProfile: {
+            name: 'Anika'
+          }
+        }
+      })
+      vm.userProfile.age = 27
+      // `vm.userProfile.age` 不是响应式的
+      解决办法：可以使用 Vue.set(object, propertyName, value) 方法向嵌套对象添加响应式属性。
+      Vue.set(vm.userProfile, 'age', 27)
+      为已有对象赋值多个新属性
+      vm.userProfile = Object.assign({}, vm.userProfile, {
+        age: 27,
+        favoriteColor: 'Vue Green'
+      })
     
+    
+   // 显示过滤/排序后的结果
+    <li v-for="n in evenNumbers">{{ n }}</li>
+    data: {
+      numbers: [ 1, 2, 3, 4, 5 ]
+    },
+    computed: {
+      evenNumbers: function () {
+        return this.numbers.filter(function (number) {
+          return number % 2 === 0
+        })
+      }
+    }
+
+  //v-for 与 v-if 一同使用
+    当它们处于同一节点，v-for 的优先级比 v-if 更高，这意味着 v-if 将分别重复运行于每个 v-for 循环中。
+
+
+/*事件处理*/
+    1、监听事件 v-on
+        <button v-on:click="counter += 1">Add 1</button>
+    2、事件处理方法
+        <button v-on:click="greet">Greet</button>
+         methods: {
+          greet: function (event) {
+            // 内容
+          }
+        }
+    3、内联处理器中的方法
+        <button v-on:click="say('hi',$event)">Say hi</button>
+        methods: {
+          say: function (message,event) {
+            alert(message)
+          }
+        }
+    4、事件修饰符
+        修饰符是由点开头的指令后缀来表示
+        <a v-on:click.stop="doThis"></a>
+          .stop 
+          .prevent  
+          .capture
+          .self
+          .once
+          .passive
+    5、按键修饰符
+        <input v-on:keyup.enter="submit">
+        .enter
+        .tab
+        .delete (捕获“删除”和“退格”键)
+        .esc
+        .space
+        .up
+        .down
+        .left
+        .right
+        可以通过全局 config.keyCodes 对象自定义按键修饰符别名：Vue.config.keyCodes.f1 = 112
+ 
+/*表单输入绑定*/
+     v-model是Vue的一个语法糖，负责监听用户的输入事件以更新数据，并对一些极端场景进行一些特殊处理
+     v-model 会忽略所有表单元素的 value、checked、selected 特性的初始值而总是将 Vue 实例的数据作为数据来源。你应该通过 JavaScript 在组件的 data 选项中声明初始值。
+     v-model 在内部为不同的输入元素使用不同的属性并抛出不同的事件：
+        text 和 textarea 元素使用 value 属性和 input 事件；
+        checkbox 和 radio 使用 checked 属性和 change 事件；
+        select 字段将 value 作为 prop 并将 change 作为事件。
+   1、基础用法  
+      1）文本
+        <input v-model="message" placeholder="edit me">
+      2）多行文本
+      <textarea v-model="message" placeholder="add multiple lines"></textarea>
+      3）复选框
+        单个复选框，绑定到布尔值：<input type="checkbox" id="checkbox" v-model="checked">
+        多个复选框，绑定到同一个数组：<input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+      4）单选按钮
+        <input type="radio" id="one" value="One" v-model="picked">
+      5）选择框
+        单选时（绑定单个选项值）：<select v-model="selected"></select>      selected: '' ==> B
+        多选时 (绑定到一个数组)： <select v-model="selected"></select>      selected: [] ==> [ "B", "C" ]
+    2、修饰符 
+        1）.lazy  相当于使用change事件
+        2）.number 将输入值转为数值类型
+        3）.trim  自动过滤首尾空白字符
+
+/*组件基础*/
+      // 定义一个名为 button-counter 的新组件
+      Vue.component('button-counter', {
+        data: function () {
+          return {
+            count: 0
+          }
+        },
+        template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+      })
+    1、组件复用
+      1）data 必须是一个函数
+      data: function () {
+        return {
+          count: 0
+        }
+      }
+    2、组件的组织
+      1）组件的注册类型：全局注册和局部注册
+        //全局注册：Vue.component('my-component-name', {
+                     // ... options ...
+                   })
+              全局注册的组件可以用在其被注册之后的任何 (通过 new Vue) 新创建的 Vue 根实例，也包括其组件树中的所有子组件的模板中
+        //局部注册
       
+    3、通过 Prop 向子组件传递数据  
+        Vue.component('blog-post', {
+          props: ['title'],
+          template: '<h3>{{ title }}</h3>'
+        })
+        <blog-post title="My journey with Vue"></blog-post>
+      
+    4、监听子组件事件  
+        父级组件通过 v-on 监听子组件实例事件，子组件可以通过调用内建的 $emit 方法传入事件名称来触发事件
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    
+    
+    
