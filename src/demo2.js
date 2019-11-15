@@ -652,22 +652,159 @@
   </base-layout>
 
 
+/*动态组件 & 异步组件*/
+    1、在动态组件上使用 keep-alive
+      <keep-alive> 元素能将那些标签的组件实例能够被在它们第一次被创建的时候缓存下来
+      <keep-alive>
+        <component v-bind:is="currentTabComponent"></component>
+      </keep-alive>
+
+    2、异步组件
+        Vue.component(
+          'async-webpack-example',
+          // 这个 `import` 函数会返回一个 `Promise` 对象。
+          () => import('./my-async-component')
+        )
+
+        new Vue({
+          // ...
+          components: {
+            'my-component': () => import('./my-async-component')
+          }
+        })
 
 
+/*处理边界情况*/
+1、访问元素 & 组件
+  a)访问根实例
+    在每个 new Vue 实例的子组件中，其根实例可以通过 $root 属性进行访问。
+    // Vue 根实例
+    new Vue({
+      data: {
+        foo: 1
+      },
+      computed: {
+        bar: function () { /* ... */ }
+      },
+      methods: {
+        baz: function () { /* ... */ }
+      }
+    })
+    // 获取根组件的数据
+    this.$root.foo
+    // 写入根组件的数据
+    this.$root.foo = 2
+    // 访问根组件的计算属性
+    this.$root.bar
+    // 调用根组件的方法
+    this.$root.baz()
+  b)访问父级组件实例
+    $parent 属性可以用来从一个子组件访问父组件的实例
+    this.$parent.foo
+  d)访问子组件实例或子元素
+    通过 ref 特性为这个子组件赋予一个 ID 引用
+      <base-input ref="usernameInput"></base-input>
+    在定义了这个 ref 的组件里，你可以使用：this.$refs.usernameInput
+
+    ref 可以提供对内部指定元素的访问
+    <input ref="input">
+    methods: {
+      // 用来从父级组件聚焦输入框
+      focus: function () {
+        this.$refs.input.focus()
+      }
+    }
+    this.$refs.usernameInput.focus() //父级组件通过下面的代码聚焦输入框
+    注意：$refs 只会在组件渲染完成之后生效，并且它们不是响应式的。
+  e)依赖注入
+    provide 选项允许我们指定我们想要提供给后代组件的数据/方法
+      provide: function () {
+        return {
+          getMap: this.getMap
+        }
+      }
+    inject 选项来接收指定的我们想要添加在这个实例上的属性
+      inject: ['getMap']
+    优点：
+      相比 $parent 来说，这个用法可以让我们在任意后代组件中访问 getMap，而不需要暴露整个 <google-map> 实例。
+      这允许我们更好的持续研发该组件，而不需要担心我们可能会改变/移除一些子组件依赖的东西。
+      同时这些组件之间的接口是始终明确定义的，就和 props 一样。
+    缺点：
+      它将你应用程序中的组件与它们当前的组织方式耦合起来，使重构变得更加困难
+      同时所提供的属性是非响应式的
+  2、程序化的事件侦听器
+    通过 $on(eventName, eventHandler) 侦听一个事件
+    通过 $once(eventName, eventHandler) 一次性侦听一个事件
+    通过 $off(eventName, eventHandler) 停止侦听一个事件
+
+   
+
+/*进入/离开 & 列表过渡*/
+    Vue 在插入、更新或者移除 DOM 时，提供多种不同方式的应用过渡效果
+      在 CSS 过渡和动画中自动应用 class
+      可以配合使用第三方 CSS 动画库，如 Animate.css
+      在过渡钩子函数中使用 JavaScript 直接操作 DOM
+      可以配合使用第三方 JavaScript 动画库，如 Velocity.js
+    1、单元素/组件的过渡
+      Vue 提供了 transition 的封装组件，在下列情形中，可以给任何元素和组件添加进入/离开过渡
+        条件渲染 (使用 v-if)
+        条件展示 (使用 v-show)
+        动态组件
+        组件根节点
+      <div id="demo">
+        <button v-on:click="show = !show">
+          Toggle
+        </button>
+        <transition name="fade">
+          <p v-if="show">hello</p>
+        </transition>
+      </div>
+      new Vue({
+        el: '#demo',
+        data: {
+          show: true
+        }
+      })
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+      }
+      .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+        opacity: 0;
+      }
+    a)自定义过渡的类名
+      enter-class
+      enter-active-class
+      enter-to-class (2.1.8+)
+      leave-class
+      leave-active-class
+      leave-to-class (2.1.8+)
 
 
+/*混入*/
+      混入 (mixin) 来分发 Vue 组件中的可复用功能。
+      一个混入对象可以包含任意组件选项。当组件使用混入对象时，所有混入对象的选项将被“混合”进入该组件本身的选项。
+      // 定义一个混入对象
+      var myMixin = {
+        created: function () {
+          this.hello()
+        },
+        methods: {
+          hello: function () {
+            console.log('hello from mixin!')
+          }
+        }
+      }
 
+      // 定义一个使用混入对象的组件
+      var Component = Vue.extend({
+        mixins: [myMixin]
+      })
 
+      var component = new Component() // => "hello from mixin!"
 
-
-
-
-
-
-
-
-
-
+  1、选项合并
+    当组件和混入对象含有同名选项时，这些选项将以恰当的方式进行“合并”。
+    同名钩子函数将合并为一个数组，因此都将被调用。
 
 
 
