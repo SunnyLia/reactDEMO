@@ -424,6 +424,248 @@
           2)一个组件的选项对象
 
 
+/*组件注册*/
+    1)组件名写法
+        <my-component-name>
+        <MyComponentName>
+    2）全局注册
+        Vue.component('my-component-name', {})
+    3）局部注册
+        new Vue({
+          el: '#app',
+          components: {
+            'component-a': ComponentA,
+            'component-b': ComponentB
+          }
+        })
+    4）模块系统
+        a)在模块系统中局部注册
+          创建一个 components 目录，并将每个组件放置在其各自的文件中,然后在局部注册之前导入要使用的组件。
+          import ComponentA from './ComponentA'
+          import ComponentC from './ComponentC'
+
+          export default {
+            components: {
+              ComponentA,
+              ComponentC
+            },
+            // ...
+          }
+        全局注册的行为必须在根 Vue 实例 (通过 new Vue) 创建之前发生
+    
+    
+/*Prop*/    
+    1、Prop 类型
+      props: {
+        title: String,
+        likes: Number,
+        isPublished: Boolean,
+        commentIds: Array,
+        author: Object,
+        callback: Function,
+        contactsPromise: Promise // or any other constructor
+      }
+    2、传递静态或动态 Prop
+        静态：<blog-post title="My journey with Vue"></blog-post>
+        动态：<blog-post v-bind:title="post.title"></blog-post>
+    3、单向数据流
+        1）所有的 prop 都使得其父子 prop 之间形成了一个单向下行绑定：父级 prop 的更新会向下流动到子组件中，但是反过来则不行。
+        这样会防止从子组件意外改变父级组件的状态，从而导致你的应用的数据流向难以理解。
+        2）额外的，每次父级组件发生更新时，子组件中所有的 prop 都将会刷新为最新的值。这意味着你不应该在一个子组件内部改变 prop。如果你这样做了，Vue 会在浏览器的控制台中发出警告
+        3）这里有两种常见的试图改变一个 prop 的情形：
+          a)这个 prop 用来传递一个初始值；这个子组件接下来希望将其作为一个本地的 prop 数据来使用。在这种情况下，最好定义一个本地的 data 属性并将这个 prop 用作其初始值：
+            props: ['initialCounter'],
+            data: function () {
+              return {
+                counter: this.initialCounter
+              }
+            }
+          b)这个 prop 以一种原始的值传入且需要进行转换。在这种情况下，最好使用这个 prop 的值来定义一个计算属性：
+            props: ['size'],
+            computed: {
+              normalizedSize: function () {
+                return this.size.trim().toLowerCase()
+              }
+            }    
+    4）Prop 验证
+        Vue.component('my-component', {
+          props: {
+            // 基础的类型检查 (`null` 和 `undefined` 会通过任何类型验证)
+            propA: Number,
+            // 多个可能的类型
+            propB: [String, Number],
+            // 必填的字符串
+            propC: {
+              type: String,
+              required: true
+            },
+            // 带有默认值的数字
+            propD: {
+              type: Number,
+              default: 100
+            },
+            // 带有默认值的对象
+            propE: {
+              type: Object,
+              // 对象或数组默认值必须从一个工厂函数获取
+              default: function () {
+                return { message: 'hello' }
+              }
+            },
+            // 自定义验证函数
+            propF: {
+              validator: function (value) {
+                // 这个值必须匹配下列字符串中的一个
+                return ['success', 'warning', 'danger'].indexOf(value) !== -1
+              }
+            }
+          }
+        })
+       
+        type 可以是下列原生构造函数中的一个：
+          String
+          Number
+          Boolean
+          Array
+          Object
+          Date
+          Function
+          Symbol
+    
+     5）非 Prop 的特性
+      a)替换/合并已有的特性
+        从外部提供给组件的值会替换掉组件内部设置好的值。
+        所以如果传入 type="text" 就会替换掉 type="date" 并把它破坏！庆幸的是，class 和 style 特性会稍微智能一些，即两边的值会被合并起来，从而得到最终的值
+      b)禁用特性继承
+        在组件的选项中设置 inheritAttrs: false,实例配合$attrs 属性使用
+
+
+/*自定义事件*/
+  1、自定义组件的 v-model
+    Vue.component('base-checkbox', {
+      model: {
+        prop: 'checked',
+        event: 'change'
+      },
+      props: {
+        checked: Boolean
+      },
+      template: `
+        <input
+          type="checkbox"
+          v-bind:checked="checked"
+          v-on:change="$emit('change', $event.target.checked)"
+        >
+      `
+    })
+    <base-checkbox v-model="lovingVue"></base-checkbox>
+    这里的 lovingVue 的值将会传入这个名为 checked 的 prop。同时当 <base-checkbox> 触发一个 change 事件并附带一个新的值的时候，这个 lovingVue 的属性将会被更新。
+  2、将原生事件绑定到组件
+    $listeners提供了包含了作用在这个组件上的所有监听器。有了这个 $listeners 属性，你就可以配合 v-on="$listeners" 将所有的事件监听器指向这个组件的某个特定的子元素。
+  3、.sync 修饰符
+    在一个包含 title prop 的假设的组件中，我们可以用以下方法表达对其赋新值的意图：
+    this.$emit('update:title', newTitle)
+    然后父组件可以监听那个事件并根据需要更新一个本地的数据属性。例如：
+    <text-document
+      v-bind:title="doc.title"
+      v-on:update:title="doc.title = $event"
+    ></text-document>
+    为了方便起见，我们为这种模式提供一个缩写，即 .sync 修饰符：
+    <text-document v-bind:title.sync="doc.title"></text-document>
+
+    当我们用一个对象同时设置多个 prop 的时候，也可以将这个 .sync 修饰符和 v-bind 配合使用：
+    <text-document v-bind.sync="doc"></text-document>
+    这样会把 doc 对象中的每一个属性 (如 title) 都作为一个独立的 prop 传进去，然后各自添加用于更新的 v-on 监听器。
+
+
+/*插槽*/
+  1、插槽内容<slot>
+    <navigation-link url="/profile">
+      Your Profile
+    </navigation-link>
+    当组件渲染的时候，<slot></slot> 将会被替换为“Your Profile”。
+    <a
+      v-bind:href="url"
+      class="nav-link"
+    >
+      <slot></slot>
+    </a>
+    插槽内可以包含任何模板代码，包括 HTML和组件：
+
+  2、编译作用域
+    父级模板里的所有内容都是在父级作用域中编译的；子模板里的所有内容都是在子作用域中编译的。
+    <navigation-link url="/profile">{{ url }}</navigation-link>
+    <!--这里的 `url` 会是 undefined，因为 "/profile" 是_传递给_ <navigation-link> 的而不是在 <navigation-link> 组件*内部*定义的。-->
+  3、后备内容
+    放在 <slot> 标签内，在父组件没有提供内容的时候被渲染
+    <button type="submit">
+      <slot>Submit</slot>
+    </button>
+  4、具名插槽
+      带有name属性的 <slot>可以用来定义额外的插槽
+        <div class="container">
+          <header>
+            <slot name="header"></slot>
+          </header>
+          <main>
+            <slot></slot>
+          </main>
+        </div>
+      在向具名插槽提供内容的时候，我们可以在一个 <template> 元素上使用 v-slot 指令，并以 v-slot 的参数的形式提供其名称
+        <base-layout>
+          <template v-slot:header>
+            <h1>Here might be a page title</h1>
+          </template>
+          <p>A paragraph for the main content.</p> ==>这种会被默认插槽渲染
+        </base-layout>
+      现在 <template> 元素中的所有内容都将会被传入相应的插槽。
+
+      具名插槽的缩写 #
+      <template #header></template>
+  5、作用域插槽
+      原理：作用域插槽的内部工作原理是将你的插槽内容包括在一个传入单个参数的函数里function (slotProps) {// 插槽内容}
+      为了让 user 在父级的插槽内容中可用，我们可以将 user 作为 <slot> 元素的一个特性绑定上去：
+      <span>
+        <slot v-bind:user="user">
+          {{ user.lastName }}
+        </slot>
+      </span>
+      现在在父级作用域中，我们可以给 v-slot 带一个值来定义我们提供的插槽 prop 的名字：
+      <current-user>
+        <template v-slot:default="slotProps">
+          {{ slotProps.user.firstName }}
+        </template>
+      </current-user>
+    a)独占默认插槽的缩写语法
+      不带参数的 v-slot 被假定对应默认插槽：
+      <current-user v-slot="slotProps">
+        {{ slotProps.user.firstName }}
+      </current-user>
+    b)解构插槽 Prop
+      <current-user v-slot="{ user }"></current-user>
+      <current-user v-slot="{ user = { firstName: 'Guest' } }"></current-user>
+  6、动态插槽名
+  <base-layout>
+    <template v-slot:[dynamicSlotName]>
+      ...
+    </template>
+  </base-layout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
