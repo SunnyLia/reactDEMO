@@ -837,24 +837,216 @@
         unbind：只调用一次，指令与元素解绑时调用。
 
 
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+/*vuex*/      
+    Vuex 和单纯的全局对象有以下两点不同：
+      Vuex 的状态存储是响应式的。当 Vue 组件从 store 中读取状态的时候，若 store 中的状态发生变化，那么相应的组件也会相应地得到高效更新。
+      你不能直接改变 store 中的状态。改变 store 中的状态的唯一途径就是显式地提交 (commit) mutation。这样使得我们可以方便地跟踪每一个状态的变化，从而让我们能够实现一些工具帮助我们更好地了解我们的应用。 
+    1、state
+      Vuex 使用单一状态树——是的，用一个对象就包含了全部的应用层级状态。
+      a)在 Vue 组件中获得 Vuex 状态
+        Vuex 通过 store 选项，提供了一种机制将状态从根组件“注入”到每一个子组件中（需调用 Vue.use(Vuex)）
+        通过在根实例中注册 store 选项，该 store 实例会注入到根组件下的所有子组件中，且子组件能通过 this.$store 访问到。
+      b)mapState 辅助函数
+        当一个组件需要获取多个状态时候，可以使用 mapState 辅助函数帮助我们生成计算属性
+        import { mapState } from 'vuex'
+        export default {
+          // ...
+          computed: mapState({
+            // 箭头函数可使代码更简练
+            count: state => state.count,
+            // 传字符串参数 'count' 等同于 `state => state.count`
+            countAlias: 'count',
+            // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+            countPlusLocalState (state) {
+              return state.count + this.localCount
+            }
+          })
+        }
+      c)对象展开运算符
+        computed: {
+          localComputed () { /* ... */ },
+          // 使用对象展开运算符将此对象混入到外部对象中
+          ...mapState({
+            // ...
+          })
+        }
+    2、Getter
+        就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。
+        a)通过属性访问
+          Getter 会暴露为 store.getters 对象，你可以以属性的形式访问这些值：
+            store.getters.doneTodos
+          Getter 也可以接受其他 getter 作为第二个参数：
+            getters: {
+              // ...
+              doneTodosCount: (state, getters) => {
+                return getters.doneTodos.length
+              }
+            }
+        b)通过方法访问
+          你也可以通过让 getter 返回一个函数，来实现给 getter 传参。
+          getters: {
+            // ...
+            getTodoById: (state) => (id) => {
+              return state.todos.find(todo => todo.id === id)
+            }
+          }
+        c)mapGetters 辅助函数
+          import { mapGetters } from 'vuex'
+          export default {
+            // ...
+            computed: {
+            // 使用对象展开运算符将 getter 混入 computed 对象中
+              ...mapGetters([
+                'doneTodosCount',
+                'anotherGetter',
+                // ...
+              ])
+            }
+          }
+          mapGetters({
+            // 把 `this.doneCount` 映射为 `this.$store.getters.doneTodosCount`
+            doneCount: 'doneTodosCount'
+          })
+   3、Mutation     
+      更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。  
+      当触发一个类型为 increment 的 mutation 时，需要调用 store.commit 方法： store.commit('increment')
+      a)提交载荷（Payload）  
+        向 store.commit 传入额外的参数，即 mutation 的 载荷（payload）：
+        mutations: {
+          increment (state, payload) {
+            state.count += payload.amount
+          }
+        }
+        store.commit('increment', {
+          amount: 10
+        })
+      b)对象风格的提交方式
+        store.commit({
+          type: 'increment',
+          amount: 10
+        })
+      c)使用常量替代 Mutation 事件类型
+        mutations: {
+          // 我们可以使用 ES2015 风格的计算属性命名功能来使用一个常量作为函数名
+          [SOME_MUTATION] (state) {
+            // mutate state
+          }
+        }
+        store.commit(SOME_MUTATION, result.data);
+      d)Mutation 必须是同步函数  
+      e)在组件中提交 Mutation  
+        可以在组件中使用 this.$store.commit('xxx') 提交 mutation，
+        或者使用 mapMutations 辅助函数将组件中的 methods 映射为 store.commit 调用（需要在根节点注入 store）
+        methods: {
+          ...mapMutations([
+            'increment', // 将 `this.increment()` 映射为 `this.$store.commit('increment')`
+            // `mapMutations` 也支持载荷：
+            'incrementBy' // 将 `this.incrementBy(amount)` 映射为 `this.$store.commit('incrementBy', amount)`
+          ]),
+          ...mapMutations({
+            add: 'increment' // 将 `this.add()` 映射为 `this.$store.commit('increment')`
+          })
+        }
+    4、 Action 
+          Action 类似于 mutation，不同在于：
+            Action 提交的是 mutation，而不是直接变更状态。
+            Action 可以包含任意异步操作。
+        a)分发 Action
+          Action 通过 store.dispatch 方法触发：
+          store.dispatch('increment')
+          //mutation 必须同步执行,Action可以在内部执行异步操作
+            actions: {
+              incrementAsync ({ commit }) {
+                setTimeout(() => {
+                  commit('increment')
+                }, 1000)
+              }
+            }
+          //Actions 支持同样的载荷方式和对象方式进行分发：
+          // 以载荷形式分发
+          store.dispatch('incrementAsync', {
+            amount: 10
+          })
+          // 以对象形式分发
+          store.dispatch({
+            type: 'incrementAsync',
+            amount: 10
+          })
+b)在组件中分发 Action
+  使用 this.$store.dispatch('xxx') 分发 action，
+  或者使用 mapActions 辅助函数将组件的 methods 映射为 store.dispatch 调用（需要先在根节点注入 store）
+    methods: {
+        ...mapActions([
+          'increment', // 将 `this.increment()` 映射为 `this.$store.dispatch('increment')`
+
+          // `mapActions` 也支持载荷：
+          'incrementBy' // 将 `this.incrementBy(amount)` 映射为 `this.$store.dispatch('incrementBy', amount)`
+        ]),
+        ...mapActions({
+          add: 'increment' // 将 `this.add()` 映射为 `this.$store.dispatch('increment')`
+        })
+      }   
+c)组合 Action
+  Action 通常是异步的，那么如何知道 action 什么时候结束呢？更重要的是，我们如何才能组合多个 action，以处理更加复杂的异步流程？
+    首先，你需要明白 store.dispatch 可以处理被触发的 action 的处理函数返回的 Promise，并且 store.dispatch 仍旧返回 Promise：
+    actions: {
+      actionA ({ commit }) {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            commit('someMutation')
+            resolve()
+          }, 1000)
+        })
+      }
+    }
+    现在你可以：
+
+    store.dispatch('actionA').then(() => {
+      // ...
+    })
+    在另外一个 action 中也可以：
+
+    actions: {
+      // ...
+      actionB ({ dispatch, commit }) {
+        return dispatch('actionA').then(() => {
+          commit('someOtherMutation')
+        })
+      }
+    }
+    最后，如果我们利用 async / await，我们可以如下组合 action：
+
+    // 假设 getData() 和 getOtherData() 返回的是 Promise
+
+    actions: {
+      async actionA ({ commit }) {
+        commit('gotData', await getData())
+      },
+      async actionB ({ dispatch, commit }) {
+        await dispatch('actionA') // 等待 actionA 完成
+        commit('gotOtherData', await getOtherData())
+      }
+    }
+    一个 store.dispatch 在不同模块中可以触发多个 action 函数。在这种情况下，只有当所有触发函数完成后，返回的 Promise 才会执行。
 
 
+
+
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
