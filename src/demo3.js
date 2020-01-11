@@ -133,14 +133,39 @@
            console.log(data + chunk); //打印 hello world~
         });
 
-    //写入流
-        
-
-
-
-
-
-
+    //写入流  
+        // 创建一个可以写入的流，写入到文件 output.txt 中
+        var writerStream = fs.createWriteStream('output.txt');
+        // 使用 utf8 编码写入数据
+        writerStream.write(data,'UTF8');
+        // 标记文件末尾
+        writerStream.end();
+        // 处理流事件 --> data, end, and error
+        writerStream.on('finish', function() {
+            console.log("数据已经被写入文件中~");
+        });
+    //管道流   
+        管道提供了一个输出流到输入流的机制。通常我们用于从一个流中获取数据并将数据传递到另外一个流中。
+        // 创建一个可读流
+        var readerStream = fs.createReadStream('input.txt');
+        // 创建一个可写流
+        var writerStream = fs.createWriteStream('output.txt');
+        // 管道读写操作
+        readerStream.pipe(writerStream);
+        console.log("input的内容已经写入到output里面了~");
+    //链式流
+        链式是通过连接输出流到另外一个流并创建多个流操作链的机制。链式流一般用于管道操作。
+        1）压缩文件
+            // 压缩 input.txt 文件为 input.txt.gz
+            fs.createReadStream('input.txt')
+              .pipe(zlib.createGzip())
+              .pipe(fs.createWriteStream('input.txt.gz'));    
+        2）解压文件
+            // 解压 input.txt.gz 文件为 input.txt
+            fs.createReadStream('input.txt.gz')
+              .pipe(zlib.createGunzip())
+              .pipe(fs.createWriteStream('input.txt'));
+    
 
 
     
