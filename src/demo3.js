@@ -200,21 +200,95 @@
                 d）mod，非原生模块的文件模块
 
 
+/*Node 函数*/
+    我们可以把一个函数作为变量传递，也可以直接在另一个函数的括号中定义和传递这个函数：
+    function execute(someFunction, value) {
+      someFunction(value);
+    }
+    execute(function(word){ console.log(word) }, "Hello");           
+        
+/*Node 路由*/
+    我们需要的所有的数据都会包含在request对象中，该对象作为onRequest()回调函数的第一个参数传递。但是为了解析这些数据，我们需要额外的Node.js模块，分别是url和querystring模块
+    例如：http://localhost:8888/start?hello=world
+        url.parse(string).pathname //  /start
+        url.parse(string).query //   //hello=world
+        querystring.parse(querystring)["hello"] //world
+    如何把路由和服务器整合在一起？
+    1）建立一个名为router.js的文件
+        function route(pathname) {
+          console.log("About to route a request for " + pathname);
+        }
+        exports.route = route;
+    2）在server.js文件中，将路由函数作为参数传递给服务器的start()函数
+        var http = require("http");
+        var url = require("url");
 
+        function start(route) {
+          function onRequest(request, response) {
+            var pathname = url.parse(request.url).pathname;
+            console.log("Request for " + pathname + " received.");
 
+            route(pathname);
 
+            response.writeHead(200, {"Content-Type": "text/plain"});
+            response.write("Hello World");
+            response.end();
+          }
 
+          http.createServer(onRequest).listen(8888);
+          console.log("Server has started.");
+        }
 
+        exports.start = start;
+    3）在index.js文件中，我们将路由函数注入到服务器中
+        var server = require("./server");
+        var router = require("./router");
+        server.start(router.route);
 
+/*Node 全局对象*/
+    在Node.js中的全局对象是global,所有全局变量（除了global本身以外）都是global对象的属性，我们可以在程序的任何地方访问到global属性，而不需要在应用中包含它。
+    1）全局对象与全局变量
+        global最根本的左右是作为全局变量的宿主。满足以下条件的变量是全局变量：
+            a）在最外层定义的变量
+            b）全局对象的属性
+            c）隐式定义的变量（未定义直接赋值的变量）
+        当你定义一个全局变量时，这个变量同时也会成为全局变量的属性，反之亦然。需要注意的是，在node.js中你不吭呢在最外层定义变量，因为所有用户代码都是属于当前模块的，而模块本身不是最外层上下文。
+        注意：最好不要使用var定义变量而避免引入全局变量，因为全局变量会污染命名空间，提高代码的耦合风险
+    2）_filename
+        _filename表示当前正在执行的脚本的文件名。它将输出文件所在位置的绝对路径，且和命令行参数所指定的文件名不一定相同。如果在模块中，返回的值是模块文件的路径
+        main.js中 console.log( __filename ); ///web/com/runoob/nodejs/main.js
+    3）_dirname
+        _dirname表示当前执行脚本所在的目录
+        main.js中 console.log( __dirname );  ///web/com/runoob/nodejs
+    4）setTimeout(cb,ms)    
+    5）clearTimeout(t)    
+    6）setInterval(cb,ms)  
+    7）clearInterval(t)    
+    8）console   
+    9）process   
+        process是一个全局变量，是global对象的属性
+        它用于描述当前node.js进程状态的对象，提供了一个与操作系统的简单接口。
+            process.on('exit', function(code) { //"exit"表示当进程准备退出时触发
+              // 以下代码永远不会执行
+              setTimeout(function() {
+                 console.log("该代码不会执行");
+              }, 0);
 
-
-
-
-
-
-
-
-
-
-
-    
+              console.log('退出码为:', code);
+            });
+            console.log("程序执行结束");
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
