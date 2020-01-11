@@ -166,6 +166,55 @@
               .pipe(zlib.createGunzip())
               .pipe(fs.createWriteStream('input.txt'));
     
+/*node 模块系统*/
+    模块是nodejs应用程序的基本组成部分，文件和模块是一一对应的。换而言之，一个nodejs文件就是一个模块，这个文件可能是JavaScript代码、JSON、或者编辑过的c/c++扩展
+    //创建模块
+        Node.js提供了exports和require两个对象，其中exports是模块公开的接口，require用于从外部获取一个模块的接口，即所获取模块的exports对象
+        //hello.js 
+            function Hello() { 
+                var name; 
+                this.setName = function(thyName) { 
+                    name = thyName; 
+                }; 
+                this.sayHello = function() { 
+                    console.log('Hello ' + name); 
+                }; 
+            }; 
+            module.exports = Hello;      
+
+        //main.js 
+            var Hello = require('./hello'); 
+            hello = new Hello(); 
+            hello.setName('BYVoid'); 
+            hello.sayHello(); 
+    //服务端的模块放在哪里
+        1) 从文件模块缓存中加载（优先级最高）
+        2）从原生模块加载（优先级8仅次文件缓存）
+            原生模块也有一个缓存区，同样也是优先从缓存区加载。如果缓存区没有被加载过，则调用原生模块的加载方式进行加载和执行
+        3）从文件加载
+            当文件模块缓存中不存在，而且不是原生模块的时候，Node.js会解析require方法传入的参数，并从文件系统中加载实际的文件。
+            require方法接受一下几种参数的传递：
+                a）http、fs、path等，原生模块。
+                b）./mod或../mod，相对路径的文件模块。
+                c）/pathtomodule/mod，绝对路径的文件模块。
+                d）mod，非原生模块的文件模块
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     
