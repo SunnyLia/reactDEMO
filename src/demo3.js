@@ -278,16 +278,44 @@
             });
             console.log("程序执行结束");
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+/*Node 文件系统*/
+    nodejs提供一组类似UNIX标准的文件操作API。node导入文件系统模块（fs）语法：var fs = require("fs")；
+    //异步&同步
+        Node.js文件系统（fs模块）中的方法均有异步和同步版本，例如读取文件内容的函数有异步的fs.readFile()和同步的fs.readFileSync（）。
+        异步的方法函数最后一个函数为回调函数，回调函数的第一个参数包含了错误信息（error）。
+        建议大家使用异步方法，比起同步，异步方法性能更高，速度更快，而且没有阻塞。
+            var fs = require("fs");
+            // 异步读取
+            fs.readFile('input.txt', function (err, data) {
+               if (err) {
+                   return console.error(err);
+               }
+               console.log("异步读取: " + data.toString());
+            });
+            // 同步读取
+            var data = fs.readFileSync('input.txt');
+            console.log("同步读取: " + data.toString());
+
+   //打开文件
+        异步模式下打开文件的语法格式：fs.open(path, flags[, mode], callback)
+   //获取文件信息
+        异步模式获取文件信息的语法格式：fs.stat(path, callback)
+   //写入文件
+        异步模式下写入文件的语法格式：fs.writeFile(file, data[, options], callback)
+   //读取文件
+        异步模式下读取文件的语法格式：fs.read(fd, buffer, offset, length, position, callback)
+   //关闭文件
+        异步模式下关闭文件的语法格式：fs.close(fd, callback)
+   //截取文件
+        异步模式下截取文件的语法格式：fs.ftruncate(fd, len, callback)
+   //删除文件
+        删除文件的语法格式：fs.unlink(path, callback)
+   //创建目录
+        创建目录的语法格式：fs.mkdir(path[, options], callback)
+   //读取目录
+        读取目录的语法格式：fs.readdir(path, callback)
+   //删除目录
+        删除目录的语法格式：fs.rmdir(path, callback)
         
         
         
