@@ -457,16 +457,158 @@
         var req = http.request(options, callback);
         req.end();
 
-
-
-
-
-
-
-
-
-
-
-
+/*Node Express框架*/
+    //Express简介
+        Express是一个简洁而灵活的nodejs web应用框架，提供了一系列强大特性帮助你创建各种web应用，和丰富的HTTP工具
+        使用Express可以快速的大件一个完整功能的网站。
+        其核心特性：
+            1）可以设置中间件来响应HTTP请求
+            2）定义了路由表用于执行不同的HTTP请求动作
+            3）可以通过向模板传递参数来动态渲染HTML页面
+    //Express 安装
+        如下模块与express框架一起安装：
+            1）body-parser-nodejs中间件，用于处理JSON、Raw和URL编码的数据
+            2）cookie-parser-这是一个解析cookie的工具。通过req.cookies可以获取到传过来的cookie，并把它们转成对象
+            3）nulter-nodejs中间件，处于处理enctype-"multipart/form-data"(设置表单的MIME编码)的表单数据
+    //请求和响应
+        Express应用使用回调函数的参数：request和response对象来处理请求和响应数据。
+            app.get('/', function (req, res) {
+               // --
+            })
         
-        
+    //静态文件
+        Express提供了内置的中间件express.static来设置静态文件如：图片、CSS、JavaScript等
+        你可以使用express.static中间件来设置静态文件路径。例如，如果你讲图片，css，JavaScript文件放置public目录下，你可以这么写：
+            app.use('/public', express.static('public'));
+
+    //GET方法
+        //index.htm页面
+            <form action="http://127.0.0.1:8081/process_get" method="GET">
+                First Name: <input type="text" name="first_name">  <br>
+                Last Name: <input type="text" name="last_name">
+                <input type="submit" value="Submit">
+            </form>
+
+        //server.js页面
+            var express = require('express');
+            var app = express();
+            app.use('/public', express.static('public'));
+            app.get('/index.htm', function (req, res) {
+               res.sendFile( __dirname + "/" + "index.htm" );
+            })
+
+            app.get('/process_get', function (req, res) {
+               // 输出 JSON 格式
+               var response = {
+                   "first_name":req.query.first_name,
+                   "last_name":req.query.last_name
+               };
+               console.log(response);
+               res.end(JSON.stringify(response));
+            })
+
+            var server = app.listen(8081, function () {
+              var host = server.address().address
+              var port = server.address().port
+              console.log("应用实例，访问地址为 http://%s:%s", host, port)
+            })
+    
+    //POST方法
+        //index.htm页面
+             <form action="http://127.0.0.1:8081/process_post" method="POST">
+                First Name: <input type="text" name="first_name">  <br>
+                Last Name: <input type="text" name="last_name">
+                <input type="submit" value="Submit">
+             </form>
+        //server.js页面
+            var express = require('express');
+            var app = express();
+            var bodyParser = require('body-parser');
+            // 创建 application/x-www-form-urlencoded 编码解析
+            var urlencodedParser = bodyParser.urlencoded({ extended: false })
+            app.use('/public', express.static('public'));
+            app.get('/index.htm', function (req, res) {
+               res.sendFile( __dirname + "/" + "index.htm" );
+            })
+            app.post('/process_post', urlencodedParser, function (req, res) {
+               // 输出 JSON 格式
+               var response = {
+                   "first_name":req.body.first_name,
+                   "last_name":req.body.last_name
+               };
+               console.log(response);
+               res.end(JSON.stringify(response));
+            })
+            var server = app.listen(8081, function () {
+              var host = server.address().address
+              var port = server.address().port
+              console.log("应用实例，访问地址为 http://%s:%s", host, port)
+            })
+    //文件上传
+        //index.htm页面
+            <form action="/file_upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" size="50" />
+                <br />
+                <input type="submit" value="上传文件" />   
+            </form>
+        //server.js页面
+            var express = require('express');
+            var app = express();
+            var fs = require("fs");
+            var bodyParser = require('body-parser');
+            var multer  = require('multer');
+            app.use('/public', express.static('public'));
+            app.use(bodyParser.urlencoded({ extended: false }));
+            app.use(multer({ dest: '/tmp/'}).array('image'));
+            app.get('/index.htm', function (req, res) {
+               res.sendFile( __dirname + "/" + "index.htm" );
+            })
+
+            app.post('/file_upload', function (req, res) {
+               console.log(req.files[0]);  // 上传的文件信息
+               var des_file = __dirname + "/" + req.files[0].originalname;
+               fs.readFile( req.files[0].path, function (err, data) {
+                    fs.writeFile(des_file, data, function (err) {
+                     if( err ){
+                          console.log( err );
+                     }else{
+                           response = {
+                               message:'File uploaded successfully', 
+                               filename:req.files[0].originalname
+                          };
+                      }
+                      console.log( response );
+                      res.end( JSON.stringify( response ) );
+                   });
+               });
+            })
+
+            var server = app.listen(8081, function () {
+              var host = server.address().address
+              var port = server.address().port
+              console.log("应用实例，访问地址为 http://%s:%s", host, port)
+            })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
