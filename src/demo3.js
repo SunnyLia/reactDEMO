@@ -317,6 +317,156 @@
    //删除目录
         删除目录的语法格式：fs.rmdir(path, callback)
         
-        
+/*Node GET/POST*/  
+    //获取GET请求内容
+        Get请求的内容直接被嵌入在路径中，获取url的参数 url.parse()
+            var http = require('http');
+            var url = require('url');
+            var util = require('util');
+
+            http.createServer(function(req, res){
+                res.writeHead(200, {'Content-Type': 'text/plain'});
+
+                // 解析 url 参数
+                var params = url.parse(req.url, true).query;
+                res.write("网站名：" + params.name);
+                res.write("\n");
+                res.write("网站 URL：" + params.url);
+                res.end();
+
+            }).listen(3000);
+
+    //A获取POST请求内容
+        POST请求的内容全部都在请求体中，nodejs默认不会解析请求体，当需要的时候需要手动来获取：
+            var http = require('http');
+            var querystring = require('querystring');
+
+            var postHTML = 
+              '<html><head><meta charset="utf-8"><title>菜鸟教程 Node.js 实例</title></head>' +
+              '<body>' +
+              '<form method="post">' +
+              '网站名： <input name="name"><br>' +
+              '网站 URL： <input name="url"><br>' +
+              '<input type="submit">' +
+              '</form>' +
+              '</body></html>';
+
+            http.createServer(function (req, res) {
+              // 定义了一个post变量，用于暂存请求体的信息
+              var body = "";
+              // 通过req的data事件监听函数，每当接受到请求体的数据，就累加到post变量中
+              req.on('data', function (chunk) {
+                body += chunk;
+              });
+              // 在end事件触发后，通过querystring.parse将post解析为真正的POST请求格式，然后向客户端返回。
+              req.on('end', function () {
+                // 解析参数
+                body = querystring.parse(body);
+                // 设置响应头部信息及编码
+                res.writeHead(200, {'Content-Type': 'text/html; charset=utf8'});
+
+                if(body.name && body.url) { // 输出提交的数据
+                    res.write("网站名：" + body.name);
+                    res.write("<br>");
+                    res.write("网站 URL：" + body.url);
+                } else {  // 输出表单
+                    res.write(postHTML);
+                }
+                res.end();
+              });
+            }).listen(3000);    
+
+
+/*Node 工具模块*/
+    OS模块： 提供基本的系统操作函数
+    Path模块： 提供处理和转换文件路径的工具
+    Net模块： 用于底层网络通信。提供了服务端和客户端的操作
+    DNS模块： 用于域名解析
+    Domain模块： 简化异步代码的异常处理，可以捕捉处理try catch 无法捕捉的
+
+/*Node web模块*/
+    //什么是web服务器？
+        web服务器一般指网站服务器，其基本功能就是提供web信息浏览服务。它只支持HTTP协议、HTML文档格式以及url,与客户端的网络浏览器配合。
+        大多数web服务器都支持服务端的脚本语言（PHP，Python等），并通过脚本语言从数据库获取数据，将结果返回给客户端浏览器。
+        目前最主流的三个web服务器Apache、Nginx、lls.
+    //web应用架构
+        1）client-客户端，一般指浏览器，可以通过HTTP协议向服务器请求数据
+        2）server-服务端，一般指web服务器，可以接受客户端请求，并向客户端发送响应数据。
+        3）business-业务端，通过web服务器处理应用程序，如与数据库交互，逻辑运算，调用外部程序等
+        4）data-数据层，一般由数据库组成
+    //使用NODE创建WEB服务器
+        Nodejs提供了HTTP模块，http模块主要用于大件HTTP服务端和客户端，使用HTTP服务器或客户端功能必须调用http模块，如下：var http = require('http');
+            var http = require('http');
+            var fs = require('fs');
+            var url = require('url');
+
+
+            // 创建服务器
+            http.createServer( function (request, response) {  
+               // 解析请求，包括文件名
+               var pathname = url.parse(request.url).pathname;
+
+               // 输出请求的文件名
+               console.log("Request for " + pathname + " received.");
+
+               // 从文件系统中读取请求的文件内容
+               fs.readFile(pathname.substr(1), function (err, data) {
+                  if (err) {
+                     console.log(err);
+                     // HTTP 状态码: 404 : NOT FOUND
+                     response.writeHead(404, {'Content-Type': 'text/html'});
+                  }else{             
+                     // HTTP 状态码: 200 : OK
+                     response.writeHead(200, {'Content-Type': 'text/html'});    
+
+                     // 响应文件内容
+                     response.write(data.toString());        
+                  }
+                  //  发送响应数据
+                  response.end();
+               });   
+            }).listen(8080);
+
+            // 控制台会输出以下信息
+            console.log('Server running at http://127.0.0.1:8080/');
+
+    //使用Node创建web客户端
+        var http = require('http');
+
+        // 用于请求的选项
+        var options = {
+           host: 'localhost',
+           port: '8080',
+           path: '/index.html'  
+        };
+
+        // 处理响应的回调函数
+        var callback = function(response){
+           // 不断更新数据
+           var body = '';
+           response.on('data', function(data) {
+              body += data;
+           });
+
+           response.on('end', function() {
+              // 数据接收完成
+              console.log(body);
+           });
+        }
+        // 向服务端发送请求
+        var req = http.request(options, callback);
+        req.end();
+
+
+
+
+
+
+
+
+
+
+
+
         
         
