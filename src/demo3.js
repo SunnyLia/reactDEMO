@@ -588,11 +588,38 @@
               var port = server.address().port
               console.log("应用实例，访问地址为 http://%s:%s", host, port)
             })
+    //cookie管理
+        // express_cookie.js 文件
+        var express = require('express')
+        var cookieParser = require('cookie-parser')
+        var util = require('util');
+
+        var app = express()
+        app.use(cookieParser())
+
+        app.get('/', function(req, res) {
+            console.log("Cookies: " + util.inspect(req.cookies));
+        })
+
+        app.listen(8081)
 
 
+/*Node RESTful API*/
+    REST即表述性状态传递，是一组架构约束条件和原则，满足这些约束条件和原则的应用程序或设计就是RESTful。需要注意的是，REST是设计风格而不是标准。REST通常基于使用HTTP,URL,和XML以及HTML这些现有的广泛流行的协议和标准。REST通常使用JSON数据格式。
+    //RESTful Web Services
+        web server是一个平台独立的，低耦合的，自包含的、基于可编程的web的应用程序，可使用开放的XML标准来描述、发布、发现、协调和配置这些应用程序，用于开发分布式的互操作的应用程序。
+        基于REST架构的Web Services既是RESTful.
+        由于轻量级以及通过HTTP直接传输数据的特效，web服务的RESTful方法以及成为最常见的替代方法。可以使用各种语言（java，Perl，ruby，Python，PHP，和JavaScript等）实现客户端。
+        RESTful服务通常可以通过自动客户端或代表用户的应用程序访问，但是，这种服务的简便性让用户能够与之直接交互，使用他们的web浏览器构建一个GET URL并读取返回的内容
 
-
-
+/*Node 多进程*/
+    nodejs是以单线程的模式运行的，但他是用的是事件驱动来处理并发，这样有助于我们在多核CPU系统上创建多个子进程，从而提高性能
+    每个子进程总是带有三个流对象：child.stdin,child.stdout和child.stderr。他们可能会共享父进程的stdio流，或者也可以是独立的被导流的流对象。
+    node提供了child_process模块来创建子进程，方法有：
+        1）exec-child_process.exec使用子进程执行命令，缓存子进程的输出，并将子进程的输入以回调函数参数的形式返回，
+        2）spawn-child_process.spawn使用指定的命令行参数创建新进程
+        3）fork-child_process.fork是spawn（）的特殊形式，用于在子进程中运行的模块，如 fork('./son.js') 相当于 spawn('node', ['./son.js']) 。与spawn方法不同的是，fork会在父进程与子进程之间，建立一个通信管道，用于进程之间的通信。
+        
 
 
 
