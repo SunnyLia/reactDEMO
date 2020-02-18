@@ -487,17 +487,51 @@
             5) 全局匹配：app.all(path, callback[, callback ...] //app.all('*', requireAuthentication);如果你把下面内容放在所有其他的路由定义的前面,要求所有从这个点开始的路由需要认证和自动加载一个用户
             6) 给路由参数添加回调触发器：app.param([name], callback) //app.param('user', function(req, res, next, id) {})当:user出现在路由路径中，你可以映射用户加载的逻辑处理来自动提供req.user给这个路由，或者对输入的参数进行验证。
             7) 挂载中间件方法到路径上app.use([path,], function [, function...])
-        
+           
+    //静态文件
+        Express提供了内置的中间件express.static来设置静态文件如：图片、CSS、JavaScript等
+        你可以使用express.static中间件来设置静态文件路径。例如，如果你讲图片，css，JavaScript文件放置public目录下，你可以这么写：
+            app.use('/public', express.static('public'));
+
     //请求和响应
         Express应用使用回调函数的参数：request和response对象来处理请求和响应数据。
             app.get('/', function (req, res) {
                // --
             })
-        
-    //静态文件
-        Express提供了内置的中间件express.static来设置静态文件如：图片、CSS、JavaScript等
-        你可以使用express.static中间件来设置静态文件路径。例如，如果你讲图片，css，JavaScript文件放置public目录下，你可以这么写：
-            app.use('/public', express.static('public'));
+        //Request(Http请求，简称req)
+            属性：
+            1)req.app 持有express程序实例
+            2)req.baseUrl 一个路由实例挂载的Url路径
+            3)req.body: 当使比如body-parser或multer中间件时，req.body表示提交的一对对键值数据
+            4）req.cookies: 当使用cookie-parser中间件时,表示请求发送过来的cookies
+            5）req.hostname: 获取HTTP请求头部的hostname 如："127.0.0.1"
+            6）req.originalUrl: 获取url请求连接，如 // GET /search?q=something  req.originalUrl ==> "/search?q=something"
+            7）req.params: 获取路由定义参数的值，如 // GET /user/张三  req.params.name ==> "张三"
+            8）req.path: 获取请求路径，如 // GET /search?q=something  req.path ==> "/search"
+            9）req.query: 获取url中参数的值，如 // GET /search?q=something  req.query ==> "something"
+            方法：
+            1）req.get(field):返回请求HTTP头部的域内容，如//req.get('Content-type') => "text/plain"
+            2）req.param(naem, [, defaultValue]) ：返回当前参数name的值，如：// ?name=tobi req.param('name') => "tobi" // POST name=tobi  req.param('name') => "tobi"  // /user/tobi for /user/:name  req.param('name') => "tobi"
+    
+        //Response(HTTP响应，简称res)
+            方法
+            1)res.append(field [, value]) 在指定的field的HTTP头部追加特殊的值value
+            2)res.cookie(name, value [,options])设置name和value的cookie ,如res.cookie('name', 'tobi', {'domain':'.example.com', 'path':'/admin', 'secure':true});
+            3）res.clearCookie(name [,options])根据指定的name清除对应的cookie，如res.clearCookie('name', {'path':'admin'});
+            4）res.download(path, [,filename], [,fn])传输path指定文件作为一个附件。通常，浏览器提示用户下载。
+            5）res.end([data] [, encoding]) 结束本响应的过程。
+            6）res.format(object)根据请求的对象中AcceptHTTP头部指定的接受内容。
+            7）res.get(field)返回field指定的HTTP响应的头部，如res.get('Content-Type') => "text/plain"
+            8）res.json([body])发送一个json的响应，这个方法和res.send()方法的效果相同
+            9）res.jsonp([body])发送一个json的响应，并且支持JSONP。
+            10）res.location(path)设置响应的LocationHTTP头部为指定的path参数，如res.location('/foo/bar');
+            11）res.redirect([status,] path)重定向来源于指定path的URL，以及指定的HTTP status codestatus。
+            12）res.render(view [, locals] [, callback])渲染一个视图，然后将渲染得到的HTML文档发送给客户端。如res.render('user', {name:'Tobi'}, function(err, html) {});
+            13）res.send([body])发送HTTP响应，body参数可以是一个Buffer对象，一个字符串，一个对象，或者一个数组
+            14）res.sendFile(path [, options] [, fn])传输path指定的文件
+            15）res.sendStatus(statusCode)设置响应对象的HTTP status code为statusCode并且发送statusCode的相应的字符串形式作为响应的Body
+            16）res.set(field [, value])设置响应对象的HTTP头部field为value。如，res.set('Content-Type', 'text/plain');
+            17）res.status(code)设置响应对象的HTTP status。
 
     //GET方法
         //index.htm页面
