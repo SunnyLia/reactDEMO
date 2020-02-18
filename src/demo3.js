@@ -470,6 +470,24 @@
             1）body-parser-nodejs中间件，用于处理JSON、Raw和URL编码的数据
             2）cookie-parser-这是一个解析cookie的工具。通过req.cookies可以获取到传过来的cookie，并把它们转成对象
             3）nulter-nodejs中间件，处于处理enctype-"multipart/form-data"(设置表单的MIME编码)的表单数据
+            
+    //Express 创建
+        通过调用Express模块导出的顶层的express()方法来创建app对象
+            var express = require('express');
+            var app = express();
+            app.get('/', function(req, res) {
+                res.send('hello world!');
+            });
+            app.listen(3000);
+        //app对象主要方法：
+            1) 获取路由http请求：app.Method
+            2) 返回一个单例模式的路由的实例： app.route(path)
+            3) 渲染HTML视图：app.render(view, [locals], callback) //app.render('email', function(err, html) {})
+            4) 注册模板引擎： app.engine(ext, callback) //app.engine('html', require('ejs').renderFile);使用EJS模板引擎来渲染.html文件：
+            5) 全局匹配：app.all(path, callback[, callback ...] //app.all('*', requireAuthentication);如果你把下面内容放在所有其他的路由定义的前面,要求所有从这个点开始的路由需要认证和自动加载一个用户
+            6) 给路由参数添加回调触发器：app.param([name], callback) //app.param('user', function(req, res, next, id) {})当:user出现在路由路径中，你可以映射用户加载的逻辑处理来自动提供req.user给这个路由，或者对输入的参数进行验证。
+            7) 挂载中间件方法到路径上app.use([path,], function [, function...])
+        
     //请求和响应
         Express应用使用回调函数的参数：request和response对象来处理请求和响应数据。
             app.get('/', function (req, res) {
