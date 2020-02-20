@@ -487,6 +487,7 @@
             5) 全局匹配：app.all(path, callback[, callback ...] //app.all('*', requireAuthentication);如果你把下面内容放在所有其他的路由定义的前面,要求所有从这个点开始的路由需要认证和自动加载一个用户
             6) 给路由参数添加回调触发器：app.param([name], callback) //app.param('user', function(req, res, next, id) {})当:user出现在路由路径中，你可以映射用户加载的逻辑处理来自动提供req.user给这个路由，或者对输入的参数进行验证。
             7) 挂载中间件方法到路径上app.use([path,], function [, function...])
+            8) 将应用程序局部变量提供给应用程序内呈现的所有模板app.locals //app.locals.title = 'My App';
            
     //静态文件
         Express提供了内置的中间件express.static来设置静态文件如：图片、CSS、JavaScript等
