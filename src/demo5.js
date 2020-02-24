@@ -81,8 +81,18 @@
          )
         db.demo.update({"name":"张三"},{$set:{"name":"李四"}}); //这个只会更新查找的第一条
         db.demo.update({"name":"张三"},{$set:{"name":"李四"}},false,true); //会更新符合查找条件的所有
-        
-    
+    13）删除文档
+        db.collection.remove(
+           <query>, //可选，删除的文档的条件
+           <justOne> // true删除一个文档，false删除所有匹配的文档
+        )
+        db.demo.remove({}) //删除所有demo数据
+        db.demo.remove({'name':'张三'}) //删除所有name为张三的数据
+        db.demo.remove({'name':'张三'},true) //删除第一条name为张三的数据
+    14）查询文档
+        db.collection.find(query, projection)
+        db.demo.find() //查询所有demo数据
+        db.demo.find({'name':'张三'}) //查询所有name为张三的数据
 
 /*MongoDB操作符*/
     例如，我们在demo集合中插入n条数据 db.demo.insert({"name":"张三","age":20,"sex":"女"})
@@ -97,16 +107,30 @@
     7）不在某些范围内 ==> $nin  //db.demo.find({"age" : {$nin : [ 18, 24 ] }}) 在demo集合中找到年龄不是18和24的数据
     8）多种条件查找 ==> $or  //db.demo.find({'$or':[{'age': 20},{'sex':'女'}]}) 在demo集合中找到年龄是18岁或者是女生的数据
       
+/*Limit与Skip方法*/
+    1）limit()
+        如果你需要在MongoDB中读取指定数量的数据记录，可以使用MongoDB的limit方法，limit()方法接受一个数字参数，该参数指定从MongoDB中读取的记录条数。
+        语法：db.COLLECTION_NAME.find().limit(NUMBER)
+        db.demo.find({"sex":"女"}).limit(2) //获取性别为女的2条数据
+    2）skip() 使用skip()方法来跳过指定数量的数据
+        语法：db.COLLECTION_NAME.find().limit(NUMBER).skip(NUMBER)
+        db.demo.find({"sex":"女"}).limit(1).skip(1) //获取性别为女的第2条数据
 
-/*MongoDB修饰符*/
-    1）$inc
-    1）$set
-    1）$unset
-    1）$push
-    1）$pop
-    1）$upsert
+/*sort()排序*/
+    在MongoDB中使用sort()方法对数据进行排序，sort()方法可以通过参数指定排序的字段，并使用1和-1来指定排序的方式，其中1为升序排列，-1为降序排列。
+    语法：db.COLLECTION_NAME.find().sort({KEY:1})
+    db.demo.find({"sex":"女"}).sort({"age":-1}) //将所有性别为女的数据按年龄倒序排列
 
+/*createIndex()索引*/
+    索引是一种特殊的数据结构，存储在一个易于遍历读取的数据集合中，对数据库中一列或多列的值进行排序，能够极大的提高查询效率，
+    语法：db.collection.createIndex(keys, options)。其中的Key值为你要创建的索引字段，1为指定按升序创建索引，-1为按降序来创建索引。
+    db.demo.createIndex({"name":1})
+    db.demo.createIndex({"name":1,"age":-1}) //使用多个字段创建索引，在关系型数据库中称作复合索引
 
+/*aggregate()聚合*/
+    MongoDB中，聚合主要用于处理数据（诸如统计平均值、求和等），并返回计算后的数据结果。
+    语法：db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)
+    db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}]) //统计每个作者所写的文章
 
 
 
