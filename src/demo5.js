@@ -55,3 +55,65 @@
         -MongoDB允许在服务端执行脚本，可以用Javascript编写某个函数，直接在服务端执行，也可以把函数的定义存储在服务端，下次直接调用即可。
         -MongoDB支持各种编程语言:RUBY，PYTHON，JAVA，C++，PHP，C#等多种语言。
         -MongoDB安装简单。
+
+/*MongoDB语法*/
+    1）查看所有数据库：show dbs
+    2）显示当前数据库：db
+    3）使用某个数据库：use test(数据库名)
+    4）创建数据库：use demo(use一个不存在的数据库名则会创建一个新的数据库demo,但是它现在还并不存在数据库列表中，要显示它，我们需要向demo数据库插入一些数据)
+    5）删除当前数据库：db.dropDatabase();
+
+    7）创建集合：db.createCollection(name, options) //不需要自己创建集合，当向数据库插入文档时，会自动创建集合demo
+    8）查看集合：show collections 或者 show tables
+    9）删除集合：db.demo.drop() 
+    
+    10）插入文档：db.demo.insert({"name":"张三"})
+    11）查看插入的文档：db.demo.find()
+    12）更新文档：
+        db.collection.update(
+            <query>, //查询条件
+            <update>, //更新文档
+            {
+                 upsert: <boolean>, //可选，如果没有
+                 multi: <boolean>, //可选，是否全部更新
+                 writeConcern: <document>
+            }
+         )
+        db.demo.update({"name":"张三"},{$set:{"name":"李四"}}); //这个只会更新查找的第一条
+        db.demo.update({"name":"张三"},{$set:{"name":"李四"}},false,true); //会更新符合查找条件的所有
+        
+    
+
+/*MongoDB操作符*/
+    例如，我们在demo集合中插入n条数据 db.demo.insert({"name":"张三","age":20,"sex":"女"})
+    0）(=) 等于 ==> $eq
+    0）(!=) 不等于 ==> $ne 
+    1）(>) 大于 ==> $gt 
+    2）(<) 小于 ==> $lt //db.demo.find({"age" : {$lt : 20}}) 在demo集合中找到年龄小于20的数据
+    3）(>=) 大于等于 ==> $gte //db.demo.find({"age" : {$gte : 20}}) 在demo集合中找到年龄大于等于20的数据
+    4）(<=) 小于等于 ==> $lte
+    5）(a<x<y) 大于a小于y  //db.demo.find({"age" : {$gt : 18 , $lt : 24 }}) 在demo集合中找到年龄大于18小于24的数据
+    6）在某些范围内 ==> $in  //db.demo.find({"age" : {$in : [ 18, 24 ] }}) 在demo集合中找到年龄为18和24的数据
+    7）不在某些范围内 ==> $nin  //db.demo.find({"age" : {$nin : [ 18, 24 ] }}) 在demo集合中找到年龄不是18和24的数据
+    8）多种条件查找 ==> $or  //db.demo.find({'$or':[{'age': 20},{'sex':'女'}]}) 在demo集合中找到年龄是18岁或者是女生的数据
+      
+
+/*MongoDB修饰符*/
+    1）$inc
+    1）$set
+    1）$unset
+    1）$push
+    1）$pop
+    1）$upsert
+
+
+
+
+
+
+
+
+
+
+
+
