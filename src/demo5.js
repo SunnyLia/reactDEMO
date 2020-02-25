@@ -130,12 +130,30 @@
 /*aggregate()聚合*/
     MongoDB中，聚合主要用于处理数据（诸如统计平均值、求和等），并返回计算后的数据结果。
     语法：db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)
-    db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}]) //统计每个作者所写的文章
-
-
-
-
-
+    db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}]) //通过字段 by_user 字段对数据进行分组，并计算 by_user 字段相同值的总和
+    注意：这个_id是不能改的！！！
+    1、表达式
+        1）$sum 计算总和  //b.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : "$likes"}}}]) //统计每个作者所有文章的收藏数
+        2）$avg 计算平均值  //db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$avg : "$likes"}}}]) //统计每个作者每篇文章中的平均收藏数
+        3）$min 获取集合中所有文档对应值的最小值 //db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$min : "$likes"}}}]) //统计每个作者每篇文章中的最小收藏数
+        4）$max 获取集合中所有文档对应值的最大值 //db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$max : "$likes"}}}]) //统计每个作者每篇文章中的最大收藏数
+        5）$push 在结果文档中插入值到一个数组中 //db.mycol.aggregate([{$group : {_id : "$by_user", url : {$push: "$url"}}}]) //将每个作者每篇文章的url放入一个数组中
+        6）$addToSet 在结果文档中插入值到一个数组中，但不创建副本 //db.mycol.aggregate([{$group : {_id : "$by_user", url : {$addToSet : "$url"}}}]) //将每个作者每篇文章的url去掉重复值后放入一个数组中
+        7）$first 根据资源文档的排序获取第一个文档数据 //db.mycol.aggregate([{$group : {_id : "$by_user", first_url : {$first : "$url"}}}]) //获取每个作者的排在第一文章的url
+        8）$last 根据资源文档的排序获取最后一个文档数据 //db.mycol.aggregate([{$group : {_id : "$by_user", url : {$last : "$url"}}}]) //获取每个作者的排在最后文章的url
+    2、管道
+        MongoDB的聚合管道将MongoDB完档在一个管道处理完毕后将结果传递给下一个管道处理。管道操作时可以重复的。
+        表达式：处理输入文档并输出。表达式是无状态的，只能用于计算当前集合管道的文档，不能处理其他的文档。
+        1）$project：修改输入文档的结构。可以用来重命名、增加或删除域，也可以用于创建计算结果以及嵌套文档。
+            db.article.aggregate({ $project : {likes : 1 , _id: 0 }}); //全部数据中，只显示like数，不显示_id
+        2）$match：用于过滤数据，只输出符合条件的文档。$match使用MongoDB的标准查询操作。
+            db.articles.aggregate([{ $match: { likes: { $gt: 70 } } }, { $group: { _id: null, count: { $sum: 1 } } }]); //大于70收藏数的总和
+        3）$limit：用来限制MongoDB聚合管道返回的文档数。
+        4）$skip：在聚合管道中跳过指定数量的文档，并返回余下的文档。
+        5）$unwind：将文档中的某一个数组类型字段拆分成多条，每条包含数组中的一个值。
+        6）$group：将集合中的文档分组，可用于统计结果。
+        7）$sort：将输入文档排序后输出。
+        8）$geoNear：输出接近某一地理位置的有序文档。
 
 
 
