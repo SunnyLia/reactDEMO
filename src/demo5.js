@@ -56,6 +56,52 @@
         -MongoDB支持各种编程语言:RUBY，PYTHON，JAVA，C++，PHP，C#等多种语言。
         -MongoDB安装简单。
 
+
+/*MongoDB 概念解析*/
+    -database 数据库
+    -collection 数据库表/集合
+    -document 数据记录行/文档
+    -field 数据字段/域
+    -index 索引
+    -primary key 主键,MongoDB自动将_id字段设置为主键
+    1、数据库
+        MongoDB的默认数据库为"db"，该数据库存储在data目录中。
+        MongoDB的单个实例可以容纳多个独立的数据库，每一个都有自己的集合和权限，不同的数据库也放置在不同的文件中
+        如下一些有特殊作用的数据库，其数据库名是保留的
+            a）admin： 从权限的角度来看，这是"root"数据库。要是将一个用户添加到这个数据库，这个用户自动继承所有数据库的权限。一些特定的服务器端命令也只能从这个数据库运行，比如列出所有的数据库或者关闭服务器。
+            b）local: 这个数据永远不会被复制，可以用来存储限于本地单台服务器的任意集合
+            c）config: 当Mongo用于分片设置时，config数据库在内部使用，用于保存分片的相关信息。
+    2、文档
+        文档是一组键值(key-value)对(即 BSON)。MongoDB 的文档不需要设置相同的字段，并且相同的字段不需要相同的数据类型，
+        例如，{"site":"www.runoob.com", "name":"菜鸟教程"}
+    3、集合
+        集合就是 MongoDB 文档组，类似于 RDBMS （关系数据库管理系统)中的表格。
+        集合存在于数据库中，集合没有固定的结构，这意味着你在对集合可以插入不同格式和类型的数据，但通常情况下我们插入集合的数据都会有一定的关联性。
+    4、元数据
+        数据库的信息是存储在集合中。它们使用了系统的命名空间：dbname.system.*
+        a）dbname.system.namespaces 列出所有名字空间。
+        b）dbname.system.indexes 列出所有索引。
+        c）dbname.system.profile 包含数据库概要(profile)信息。
+        d）dbname.system.users 列出所有可访问数据库的用户。
+        e）dbname.local.sources 包含复制对端（slave）的服务器信息和状态。
+    5、MongoDB 数据类型
+        1）String	字符串。存储数据常用的数据类型。在 MongoDB 中，UTF-8 编码的字符串才是合法的。
+        2）Integer	整型数值。用于存储数值。根据你所采用的服务器，可分为 32 位或 64 位。
+        3）Boolean	布尔值。用于存储布尔值（真/假）。
+        4）Double	双精度浮点值。用于存储浮点值。
+        5）Min/Max keys	将一个值与 BSON（二进制的 JSON）元素的最低值和最高值相对比。
+        6）Array	用于将数组或列表或多个值存储为一个键。
+        7）Timestamp	时间戳。记录文档修改或添加的具体时间。
+        8）Object	用于内嵌文档。
+        9）Null	用于创建空值。
+        10）Symbol	符号。该数据类型基本上等同于字符串类型，但不同的是，它一般用于采用特殊符号类型的语言。
+        11）Date	日期时间。用 UNIX 时间格式来存储当前日期或时间。你可以指定自己的日期时间：创建 Date 对象，传入年月日信息。
+        12）Object ID	对象 ID。用于创建文档的 ID。
+        13）Binary Data	二进制数据。用于存储二进制数据。
+        14）Code	代码类型。用于在文档中存储 JavaScript 代码。
+        15）Regular expression	正则表达式类型。用于存储正则表达式。
+
+
 /*MongoDB语法*/
     1）查看所有数据库：show dbs
     2）显示当前数据库：db
@@ -155,7 +201,85 @@
         7）$sort：将输入文档排序后输出。
         8）$geoNear：输出接近某一地理位置的有序文档。
 
-
-
-
-
+/*复制（副本集）*/
+    1、什么是复制？
+        -保障数据的安全性
+        -数据高可用性 (24*7)
+        -灾难恢复
+        -无需停机维护（如备份，重建索引，压缩）
+        -分布式读取数据
+    2、MongoDB复制原理
+        mongodb的复制至少需要两个节点。其中一个是主节点，负责处理客户端请求，其余的都是从节点，负责复制主节点上的数据。
+        mongodb各个节点常见的搭配方式为：一主一从、一主多从。
+        主节点记录在其上的所有操作oplog，从节点定期轮询主节点获取这些操作，然后对自己的数据副本执行这些操作，从而保证从节点的数据与主节点一致。
+        
+        副本集特征：
+            -N 个节点的集群
+            -任何节点可作为主节点
+            -所有写入操作都在主节点上
+            -自动故障转移
+            -自动恢复
+    3、MongoDB副本集设置
+        1）关闭正在运行的MongoDB服务器
+            mongod --port "PORT" --dbpath "YOUR_DB_DATA_PATH" --replSet "REPLICA_SET_INSTANCE_NAME"
+            eg:mongod --port 27017 --dbpath "D:\set up\mongodb\data" --replSet rs0 //启动一个名为rs0的MongoDB实例，其端口号为27017，启动后打开命令提示框并连接上mongoDB,
+               res.initiate() 启动一个新的副本集
+               rs.conf() 查看副本集的配置
+               rs.status() 查看副本集的状态
+    4、副本集添加成员
+        进入Mongo客户端，并使用rs.add()方法来添加副本集的成员。mongoDB中你只能通过主节点将mongo服务添加到副本集中，
+        语法：rs.add(HOST_NAME:PORT)
+        eg: rs.add("mongod1.net:27017") //在启动了mongod1.net,端口为27017的Mongo服务，在客户端命令窗口使用rs.add()命令将其添加到副本集中。
+        db.isMaster() 判断当前运行的mongo服务是否为主节点
+        
+/*分片*/
+    当MongoDB存储海量的数据时，一台机器可能不足以存储数据，也可能不足以提供可接受的读写吞吐量。这时，我们就可以通过在多台机器上分割数据，使得数据库系统能存储和处理更多的数据。
+    1、为什么使用分片    
+        -复制所有的写入操作到主节点
+        -延迟的敏感数据会在主节点查询
+        -单个副本集限制在12个节点
+        -当请求量巨大时会出现内存不足。
+        -本地磁盘不足
+        -垂直扩展价格昂贵
+    2、 MongoDB分片  
+        三个主要组件：
+        1）Shard:
+            用于存储实际的数据块，实际生产环境中一个shard server角色可由几台机器组个一个replica set承担，防止主机单点故障
+        2）Config Server:
+            mongod实例，存储了整个 ClusterMetadata，其中包括 chunk信息。
+        3）Query Routers:
+            前端路由，客户端由此接入，且让整个集群看上去像单一数据库，前端应用可以透明使用
+    3、分片实例
+        步骤一：启动Shard Server
+        步骤二： 启动Config Server
+        步骤三： 启动Route Process
+        步骤四： 配置Sharding
+        步骤五： 程序代码内无需太大更改，直接按照连接普通的mongo数据库那样，将数据库连接接入接口40000
+        
+        
+/*备份(mongodump)与恢复(mongorestore)*/
+    1、MongoDB数据备份
+        在Mongodb中我们使用mongodump命令来备份MongoDB数据。该命令可以导出所有数据到指定目录中。mongodump命令可以通过参数指定导出的数据量级转存的服务器。
+        语法：mongodump -h dbhost -d dbname -o dbdirectory
+            -h：MongDB所在服务器地址，例如：127.0.0.1，当然也可以指定端口号：127.0.0.1:27017
+            -d：需要备份的数据库实例，例如：test
+            -o：备份的数据存放位置，例如：c:\data\dump，当然该目录需要提前建立，在备份完成后，系统自动在dump目录下建立一个test目录，这个目录里面存放该数据库实例的备份数据。
+    2、MongoDB数据恢复
+        mongodb使用 mongorestore 命令来恢复备份的数据
+        语法：mongorestore -h <hostname><:port> -d dbname <path>
+            --host <:port>, -h <:port>：MongoDB所在服务器地址，默认为： localhost:27017
+            --db , -d ：需要恢复的数据库实例，例如：test，当然这个名称也可以和备份时候的不一样，比如test2
+            --drop：恢复的时候，先删除当前数据，然后恢复备份的数据。就是说，恢复后，备份后添加修改的数据都会被删除，慎用哦！
+            <path>：mongorestore 最后的一个参数，设置备份数据所在位置，例如：c:\data\dump\test。你不能同时指定 <path> 和 --dir 选项，--dir也可以设置备份目录。
+            --dir：指定备份的目录。你不能同时指定 <path> 和 --dir 选项。
+        
+/*MongoDB 监控*/ 
+    1、mongostat 命令
+        mongostat是mongodb自带的状态检测工具，在命令行下使用。它会间隔固定时间获取mongodb的当前运行状态，并输出。如果你发现数据库突然变慢或者有其他问题的话，你第一手的操作就考虑采用mongostat来查看mongo的状态。
+        启动：启动你的Mongod服务，进入到你安装的MongoDB目录下的bin目录， 然后输入mongostat命令
+    2、mongotop 命令    
+        mongotop也是mongodb下的一个内置工具，mongotop提供了一个方法，用来跟踪一个MongoDB的实例，查看哪些大量的时间花费在读取和写入数据。 mongotop提供每个集合的水平的统计数据。默认情况下，mongotop返回值的每一秒。
+        启动：启动你的Mongod服务，进入到你安装的MongoDB目录下的bin目录， 然后输入mongotop命令
+        
+        
+        
