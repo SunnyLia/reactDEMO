@@ -282,4 +282,35 @@
         启动：启动你的Mongod服务，进入到你安装的MongoDB目录下的bin目录， 然后输入mongotop命令
         
         
+/*Node MongoDB使用*/
+    var mongodb = require("mongodb");
+    var MongoClient = mongodb.MongoClient;
+    var url = "mongodb://localhost:27017/";
+
+    MongoClient.connect(url, { useNewUrlParser: true }, function (err, client) {
+      if (err) throw err;
+      console.log("数据库已创建!");
+      var db = client.db("user"); //获取到user数据库
+      var col = db.collection("student"); //获取到student集合(表)
+      /* 插入 */
+      // col.insert({"name":"李四"}); //向集合中插入文档(数据)
+      // col.insertOne({"name":"李四"}); //向集合中插入一条文档
+      // col.insertMany({"name":"李四"}); //向集合中插入多条文档
+      /* 更新 */
+      // col.update({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
+      // col.updateOne({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
+      // col.updateMany({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
+      /* 删除 */
+      // col.deleteOne({"name":"李四"},(err,res)=>console.log(res)); //删除name为**的文档
+      // col.deleteMany({"name":"王五"}); //获取name为**的文档
+      /* 查找 */
+      // col.find({"name":"张三"}).toArray((err,docs)=> console.log(docs)); //获取name为**的文档
+      // col.find({}).toArray((err,docs)=> console.log(docs)); //获取集合下所有的文档
+      /* 排序 */
+      // col.find().sort({ "likes": -1 }); //升序1,降序-1
+      /* 分页 */
+      // col.find().skip(2).limit(2).toArray((err,docs)=> console.log(docs)); //skip跳过的条数，limit返回的条数
+      client.close();
+    });    
+        
         
