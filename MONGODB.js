@@ -55,8 +55,11 @@
         -MongoDB允许在服务端执行脚本，可以用Javascript编写某个函数，直接在服务端执行，也可以把函数的定义存储在服务端，下次直接调用即可。
         -MongoDB支持各种编程语言:RUBY，PYTHON，JAVA，C++，PHP，C#等多种语言。
         -MongoDB安装简单。
-
-
+/*启动MongoDB服务*/
+    在安装位置的bin目录，打开命令行，输入mongod --dbpath 数据存放目录
+    C:\mongodb\bin\mongod --dbpath c:\data\db
+    
+    
 /*MongoDB 概念解析*/
     -database 数据库
     -collection 数据库表/集合
