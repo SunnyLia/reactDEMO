@@ -300,9 +300,9 @@
       // col.insertOne({"name":"李四"}); //向集合中插入一条文档
       // col.insertMany({"name":"李四"}); //向集合中插入多条文档
       /* 更新 */
-      // col.update({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
-      // col.updateOne({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
-      // col.updateMany({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{"name":"王五"}); //更新_id为**文档
+      // col.update({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{$set:{"name":"王五"}}); //更新_id为**文档
+      // col.updateOne({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{$set:{"name":"王五"}}); //更新_id为**文档
+      // col.updateMany({_id: mongodb.ObjectId("5e561d4018fe8b8390c581b1")},{$set:{"name":"王五"}}); //更新_id为**文档
       /* 删除 */
       // col.deleteOne({"name":"李四"},(err,res)=>console.log(res)); //删除name为**的文档
       // col.deleteMany({"name":"王五"}); //获取name为**的文档
