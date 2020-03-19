@@ -1,0 +1,1 @@
+socket.broadcast.emit('an event', { some: 'data' }); // 消息会发送到当前房间的其他用户，除了自己
